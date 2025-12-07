@@ -23,6 +23,7 @@
         overflow: hidden; 
     }
 
+    /* --- Wrapper (画面全体固定) --- */
     .artifact-bar-wrapper {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -34,18 +35,20 @@
     .bar-bg {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
         background-size: cover; background-position: center;
-        opacity: 0.3; filter: sepia(0.4) contrast(1.1) blur(3px);
+        /* フィルターを少し強めにして、どんな画像が来ても雰囲気が統一されるように調整 */
+        opacity: 0.25; filter: sepia(0.5) contrast(1.2) blur(4px) brightness(0.8);
         transition: opacity 1s ease;
-        background-image: url('https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop');
+        /* 初期画像はJSで設定するが、念のため軽量なものを置いておく */
+        background-color: #111;
     }
     .spotlight {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: radial-gradient(circle at center, rgba(20,20,20,0.4) 0%, rgba(0,0,0,0.95) 85%);
+        background: radial-gradient(circle at center, rgba(20,20,20,0.4) 0%, rgba(0,0,0,0.98) 85%);
         z-index: 0; pointer-events: none;
     }
     .noise {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        opacity: 0.06; pointer-events: none; z-index: 1;
+        opacity: 0.08; pointer-events: none; z-index: 1;
         background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2cpIiBvcGFjaXR5PSIxIi8+PC9zdmc+');
     }
 
@@ -57,7 +60,7 @@
     }
     .hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-    /* --- Landing --- */
+    /* --- Landing Page --- */
     #landing-page { z-index: 30; width: 100%; padding: 0 20px; }
     .landing-title {
         font-family: 'Cinzel', serif !important; font-size: clamp(2.5rem, 8vw, 5rem);
@@ -84,7 +87,7 @@
         box-shadow: 0 0 25px rgba(255,255,255,0.15); letter-spacing: 0.5em;
     }
 
-    /* --- Main App --- */
+    /* --- Main App UI --- */
     #main-app { z-index: 20; width: 100%; }
     .fade-wrapper {
         opacity: 0; filter: blur(10px); transform: scale(0.97);
@@ -94,6 +97,7 @@
     }
     .fade-wrapper.visible { opacity: 1; filter: blur(0); transform: scale(1); }
 
+    /* Bartender */
     #bartender-icon {
         width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
         border: 1px solid rgba(150, 150, 150, 0.4); box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
@@ -105,6 +109,7 @@
         letter-spacing: 0.15em; font-family: sans-serif !important; text-transform: uppercase; text-align: center;
     }
 
+    /* Award */
     #award-display {
         font-family: 'Cinzel', serif !important; font-size: 0.8rem; color: #d4af37;
         border: 1px solid #d4af37; padding: 4px 12px; margin-bottom: 20px;
@@ -114,11 +119,11 @@
     }
     #award-display.show { opacity: 1; display: inline-block; }
 
+    /* Name Group */
     .name-group {
         display: flex; flex-direction: column; align-items: center;
         margin-bottom: 30px; width: 100%;
     }
-    
     .prefix-text, .suffix-text {
         font-size: 0.9rem; letter-spacing: 0.2em; color: #aaa; text-align: center;
     }
@@ -134,6 +139,7 @@
         letter-spacing: 0.05em;
     }
 
+    /* Price */
     #price-display {
         font-family: "Garamond", serif !important; font-size: 1.4rem; color: #c0b283;
         margin-bottom: 40px; font-style: italic; letter-spacing: 0.1em; text-align: center;
@@ -144,15 +150,24 @@
         margin: 0 auto 15px auto;
     }
 
+    /* Recipe */
     .recipe-card {
         font-size: 0.85rem; color: #999; line-height: 1.8;
         border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: 0; width: 100%;
         display: flex; flex-wrap: wrap; justify-content: center; gap: 15px 30px; text-align: center;
     }
-    .recipe-item { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
-    .recipe-item span { color: #555; font-size: 0.65rem; display: block; margin-bottom: 4px; letter-spacing: 0.1em; }
-    .recipe-comment { width: 100%; margin-top: 20px; font-style: italic; text-align: center; color: #bbb; font-size: 0.85rem; opacity: 0.8; letter-spacing: 0.1em; }
+    .recipe-item {
+        display: flex; flex-direction: column; align-items: center; min-width: 60px;
+    }
+    .recipe-item span { 
+        color: #555; font-size: 0.65rem; display: block; margin-bottom: 4px; letter-spacing: 0.1em;
+    }
+    .recipe-comment { 
+        width: 100%; margin-top: 20px; font-style: italic; text-align: center; color: #bbb; font-size: 0.85rem; opacity: 0.8;
+        letter-spacing: 0.1em;
+    }
 
+    /* Action Buttons */
     .action-bar {
         margin-top: 50px; display: flex; gap: 20px; justify-content: center;
         opacity: 0; transition: opacity 1s 1s;
@@ -165,6 +180,7 @@
     }
     .action-btn:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,0.05); }
 
+    /* Status & Timer */
     #status {
         position: fixed; bottom: 20px; right: 20px; font-size: 0.7rem;
         color: #444; font-family: sans-serif !important; letter-spacing: 0.1em; z-index: 100;
@@ -229,15 +245,23 @@
 
 <script>
     // --- Data ---
-    const SAFE_WORDS = ["月光", "サイバーパンク", "シュレーディンガー", "モナ・リザ", "ミッドナイト", "レトロ", "メランコリー", "ユートピア", "シンギュラリティ", "パラドックス", "エターナル", "トワイライト", "蜃気楼", "カオス", "ノスタルジア", "リグレット", "アビス"];
-    const SAFE_KATAKANA = ["アンドロメダ", "プロトコル", "エデン", "マトリックス", "リリス", "フェニックス", "リフレイン", "シンドローム", "ファントム", "クリスタル", "メトロポリス", "アルカディア", "ラグナロク", "シリウス", "プラズマ", "オメガ"];
-    const SAFE_POEMS = ["静寂と再生の味わい。", "失われた時間を求めて。", "深い夜の底で輝く光。", "記憶の片隅に残る香り。"];
+    const SAFE_WORDS = ["月光", "サイバーパンク", "シュレーディンガー", "モナ・リザ", "ミッドナイト", "レトロ", "メランコリー", "ユートピア", "シンギュラリティ", "パラドックス", "エターナル", "トワイライト", "蜃気楼", "カオス", "ノスタルジア", "リグレット", "アビス", "虚構", "ラビリンス"];
+    const SAFE_KATAKANA = ["アンドロメダ", "プロトコル", "エデン", "マトリックス", "リリス", "フェニックス", "リフレイン", "シンドローム", "ファントム", "クリスタル", "メトロポリス", "アルカディア", "ラグナロク", "シリウス", "プラズマ", "オメガ", "イデア", "ノクターン"];
+    const SAFE_POEMS = [
+        "静寂と再生の味わい。", "失われた時間を求めて。", "深い夜の底で輝く光。", "記憶の片隅に残る香り。",
+        "終わりのない夢の続き。", "言葉にできない感情を溶かして。", "透明な哀しみが胸を刺す。", "遠い星からのメッセージ。"
+    ];
     
-    const BG_IMAGES = [
-        "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1470337458703-46ad1756a187?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?q=80&w=1920&auto=format&fit=crop"
+    // ★ここが変更点：大量のUnsplash画像IDリスト
+    // 雰囲気が合う「暗いバー」「カクテル」「ネオン」「夜景」などを厳選
+    const BG_IDS = [
+        "1572116469696-31de0f17cc34", "1514362545857-3bc16c4c7d1b", "1470337458703-46ad1756a187", "1566417713940-fe7c737a9ef2",
+        "1551024709-8f23befc6f87", "1499638639663-1f7708890bc6", "1536935338788-846bbe106599", "1504674900247-0877df9cc836",
+        "1543007631-23622440726d", "1583065080141-72a58b479b5a", "1578488347632-945c4953a4b6", "1597075041503-269fa1c5405b",
+        "1574096079513-d8259312b785", "1520121401995-928cd53d49b7", "1563784462-0858916270c4", "1606923429700-87143196000f",
+        "1581008627320-1f84126ee4e2", "1516997121675-4a2d88e0c3b7", "1577258283135-48914127c208", "1600093463592-8e36a3d5b451",
+        "1558507652-2d966236291e", "1570554827083-c64ac3786948", "1561808445-063606066863", "1616433285827-498734937173",
+        "1591243316766-8c130f651234", "1597252928155-994345504544", "1617729788749-44887872441d", "1569937712-c463e32526c7"
     ];
 
     const BAN_KEYWORDS = ["人物", "生", "没", "氏", "家", "男", "女", "子", "王", "皇", "帝", "将軍", "選手", "歌手", "俳優", "声優", "作家", "政治", "軍人", "学者", "アイドル", "監督", "メンバー", "一覧", "出身", "在住", "年度", "世紀", "年", "月", "日", "地理", "都市", "町村", "県", "市", "区", "町", "村", "駅", "賞", "事件", "性", "セックス", "風俗", "アダルト", "エロ", "ヌード", "淫", "排泄", "糞", "尿", "便", "犯罪", "殺", "死", "暴力", "虐待", "テロ", "戦争", "兵器", "病", "障害", "菌", "毒", "差別"];
@@ -247,8 +271,8 @@
     const TASTES = ["Dry", "Medium", "Sweet", "Bitter", "Sour", "Spicy", "Refreshing"];
 
     // --- State ---
-    let currentCocktail = null; // 現在表示中
-    let nextCocktailPromise = null; // ★プリロード用（次のデータ）
+    let currentCocktail = null;
+    let nextCocktailPromise = null;
     let isProcessing = false;
     let offlineMode = false;
     let autoTimer = null;
@@ -257,6 +281,13 @@
     const wait = (ms) => new Promise(r => setTimeout(r, ms));
     const randomPick = (arr) => arr[Math.floor(Math.random() * arr.length)];
     const cleanWord = (w) => w.replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').replace(/_/g, ' ').replace(/一覧/g, '').replace(/カテゴリー:/g, '').trim();
+    
+    // ★背景画像のURLを生成する関数
+    function getBgUrl() {
+        const id = randomPick(BG_IDS);
+        // 高品質・軽量化のためのパラメータ付与
+        return `https://images.unsplash.com/photo-${id}?q=75&w=1600&auto=format&fit=crop`;
+    }
 
     function isValidConcept(pageData) {
         const title = pageData.title;
@@ -294,7 +325,7 @@
                 if (type === "katakana") {
                     if (/^[ァ-ヶー・＝=]+$/.test(title) && title.length >= 2 && title.length <= 15) return title;
                 } else if (type === "poetic") {
-                    if (!/^[0-9]+$/.test(title) && title.length >= 2 && title.length <= 6) return title;
+                    if (!/^[0-9]+$/.test(title) && title.length >= 2 && title.length <= 8 && !title.includes(" ")) return title;
                 } else {
                     if (title.length >= 2 && title.length <= 10 && !title.includes(" ")) return title;
                 }
@@ -307,11 +338,9 @@
     }
 
     // --- Data Generation (Background) ---
-    // ★ここが新機能：データ生成部分を独立させた関数
     async function generateCocktailData() {
         let bartender, word1, word2, award, comment;
 
-        // 並列取得
         try {
             const results = await Promise.all([
                 fetchWordFromWiki("katakana"),
@@ -327,7 +356,6 @@
             word2 = randomPick(SAFE_KATAKANA);
         }
 
-        // アワード生成
         if (Math.random() > 0.4) {
             award = null;
         } else {
@@ -337,7 +365,6 @@
             award = `${w} ${s} ${y}`;
         }
 
-        // レシピ生成
         if (offlineMode) {
             comment = randomPick(SAFE_POEMS);
         } else {
@@ -347,7 +374,10 @@
                 `「${w1}」と「${w2}」の余韻。`,
                 `まるで${w1}のような、${w2}。`,
                 `後味に${w1}を感じる、${w2}の香り。`,
-                `テーマは「${w1}」。隠し味に${w2}を。`
+                `テーマは「${w1}」。隠し味に${w2}を。`,
+                `失われた${w1}と、再生する${w2}。`,
+                `グラスの底に沈む${w1}。`,
+                `${w1}を溶かし込んだ、${w2}の雫。`
             ];
             comment = randomPick(patterns);
         }
@@ -361,17 +391,15 @@
             comment: comment
         };
 
-        // 画像のプリロード（ここが速さの鍵！）
+        // ★ここで新しい背景画像URLを取得してプリロード
         const faceUrl = `https://xsgames.co/randomusers/avatar.php?g=${Math.random()<0.5?'male':'female'}&v=${new Date().getTime()}`;
-        const bgUrl = randomPick(BG_IMAGES);
+        const bgUrl = getBgUrl(); 
         
-        // 画像を実際に読み込んでキャッシュさせる
         const img = new Image();
         img.src = faceUrl;
         const bgImg = new Image();
         bgImg.src = bgUrl;
 
-        // 顔画像の読み込み完了を待つ（最大3秒）
         await Promise.race([
             new Promise(r => img.onload = r),
             wait(3000)
@@ -398,26 +426,21 @@
         const awardUI = document.getElementById('award-display');
         const timeBar = document.getElementById('time-bar');
         
-        // フェードアウト
         wrapper.classList.remove('visible');
         awardUI.classList.remove('show');
         timeBar.style.transition = 'none';
         timeBar.style.width = '0%';
         document.getElementById('status').textContent = "Brewing...";
 
-        // 演出用ウェイト（1.2秒）
         await wait(1200);
 
         try {
-            // ★ここがポイント：準備済みのデータを使う
-            // もし初回でまだデータがなければ、今すぐ生成する
             if (!nextCocktailPromise) {
                 nextCocktailPromise = generateCocktailData();
             }
             const data = await nextCocktailPromise;
             currentCocktail = data;
 
-            // DOM更新
             document.getElementById('bg-layer').style.backgroundImage = `url('${data.bgUrl}')`;
             document.getElementById('bartender-icon').src = data.faceUrl;
             document.getElementById('bartender-name').textContent = `BARTENDER: ${data.bartender}`;
@@ -438,15 +461,12 @@
                 awardUI.style.display = "none";
             }
 
-            // フェードイン
             wrapper.classList.add('visible');
             document.getElementById('status').textContent = "";
             isProcessing = false;
 
-            // ★次回の分を裏で準備開始（プリロード）
             nextCocktailPromise = generateCocktailData();
 
-            // タイマー始動
             requestAnimationFrame(() => {
                 timeBar.style.transition = 'width 20s linear';
                 timeBar.style.width = '100%';
@@ -458,14 +478,13 @@
 
         } catch (e) {
             console.error(e);
-            nextCocktailPromise = null; // エラーならリセット
-            setTimeout(serveCocktail, 500); // リトライ
+            nextCocktailPromise = null;
+            setTimeout(serveCocktail, 500);
             isProcessing = false;
         }
     }
 
     // --- Events ---
-    // ページ読み込み時に裏で最初の1杯目を準備開始
     window.addEventListener('DOMContentLoaded', () => {
         nextCocktailPromise = generateCocktailData();
     });
