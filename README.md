@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -30,14 +31,18 @@
         overflow: hidden; z-index: 0;
     }
 
-    /* --- Backgrounds --- */
+    /* --- Backgrounds (Double Buffer for Cross-fade) --- */
     .bar-bg {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
         background-size: cover; background-position: center;
-        opacity: 0.3; filter: sepia(0.4) contrast(1.1) blur(3px);
-        transition: opacity 1s ease;
-        background-image: url('https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop');
+        opacity: 0; /* Default invisible */
+        filter: sepia(0.4) contrast(1.1) blur(3px);
+        transition: opacity 2.0s ease-in-out; /* Smooth Cross-fade */
     }
+    .bar-bg.visible {
+        opacity: 0.3; /* Target opacity */
+    }
+
     .spotlight {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background: radial-gradient(circle at center, rgba(20,20,20,0.4) 0%, rgba(0,0,0,0.95) 85%);
@@ -101,18 +106,23 @@
         background-color: #111; display: block; margin-left: auto; margin-right: auto;
     }
     #bartender-name {
-        font-size: 0.7rem; color: #888; margin-bottom: 25px;
+        font-size: 0.7rem; color: #888; margin-bottom: 15px;
         letter-spacing: 0.15em; font-family: sans-serif !important; text-transform: uppercase; text-align: center;
     }
 
+    /* 高さ固定のコンテナ（レイアウト揺れ防止） */
+    #award-container {
+        height: 30px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center;
+        width: 100%;
+    }
     #award-display {
         font-family: 'Cinzel', serif !important; font-size: 0.8rem; color: #d4af37;
-        border: 1px solid #d4af37; padding: 4px 12px; margin-bottom: 20px;
+        border: 1px solid #d4af37; padding: 4px 12px;
         letter-spacing: 0.1em; text-transform: uppercase;
         background: rgba(212, 175, 55, 0.05);
-        opacity: 0; display: none; margin: 0 auto 20px auto;
+        opacity: 0; transition: opacity 0.5s;
     }
-    #award-display.show { opacity: 1; display: inline-block; }
+    #award-display.show { opacity: 1; }
 
     .name-group {
         display: flex; flex-direction: column; align-items: center;
@@ -123,15 +133,31 @@
         font-size: 0.9rem; letter-spacing: 0.2em; color: #aaa; text-align: center;
     }
     
+    /* 名前エリアの固定化と改行制御 */
     #name-display {
         color: #fff; 
-        font-size: clamp(1.5rem, 5vw, 2.8rem);
+        font-size: clamp(1.8rem, 6vw, 2.8rem); /* レスポンシブフォント */
         line-height: 1.3; 
-        margin: 5px 0;
+        margin: 10px 0;
         padding: 0; 
-        word-wrap: break-word; width: 100%; text-align: center; white-space: normal;
+        width: 100%; text-align: center;
         font-weight: 500;
         letter-spacing: 0.05em;
+        
+        /* 高さ確保 */
+        min-height: 1.3em; 
+        display: flex; justify-content: center; align-items: center;
+
+        /* 改行の制御 */
+        white-space: normal; 
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    /* PCなど画面が広い時はなるべく1行 */
+    @media (min-width: 600px) {
+        #name-display {
+            white-space: nowrap; 
+        }
     }
 
     #price-display {
@@ -180,7 +206,9 @@
 <script>document.title = "BAR EPHEMERA";</script>
 
 <div class="artifact-bar-wrapper">
-    <div id="bg-layer" class="bar-bg"></div>
+    <div id="bg-layer-1" class="bar-bg"></div>
+    <div id="bg-layer-2" class="bar-bg"></div>
+    
     <div class="spotlight"></div>
     <div class="noise"></div>
     <div id="time-bar"></div>
@@ -200,7 +228,10 @@
         <div class="fade-wrapper" id="content-wrapper">
             <img id="bartender-icon" src="" alt="Bartender">
             <div id="bartender-name">Connecting...</div>
-            <div id="award-display"></div>
+            
+            <div id="award-container">
+                <div id="award-display"></div>
+            </div>
 
             <div class="name-group">
                 <div class="prefix-text">こちら</div>
@@ -247,11 +278,14 @@
     const TASTES = ["Dry", "Medium", "Sweet", "Bitter", "Sour", "Spicy", "Refreshing"];
 
     // --- State ---
-    let currentCocktail = null; // 現在表示中
-    let nextCocktailPromise = null; // ★プリロード用（次のデータ）
+    let currentCocktail = null;
+    let nextCocktailPromise = null;
     let isProcessing = false;
     let offlineMode = false;
     let autoTimer = null;
+    
+    // 背景管理用（アクティブなレイヤー番号 1 or 2）
+    let activeBgIndex = 1;
 
     // --- Helpers ---
     const wait = (ms) => new Promise(r => setTimeout(r, ms));
@@ -306,12 +340,9 @@
         }
     }
 
-    // --- Data Generation (Background) ---
-    // ★ここが新機能：データ生成部分を独立させた関数
     async function generateCocktailData() {
         let bartender, word1, word2, award, comment;
 
-        // 並列取得
         try {
             const results = await Promise.all([
                 fetchWordFromWiki("katakana"),
@@ -327,7 +358,6 @@
             word2 = randomPick(SAFE_KATAKANA);
         }
 
-        // アワード生成
         if (Math.random() > 0.4) {
             award = null;
         } else {
@@ -337,17 +367,73 @@
             award = `${w} ${s} ${y}`;
         }
 
-        // レシピ生成
         if (offlineMode) {
             comment = randomPick(SAFE_POEMS);
         } else {
             const w1 = await fetchWordFromWiki("poetic");
             const w2 = await fetchWordFromWiki("poetic");
+            
+            // --- 大量追加したバリエーション ---
             const patterns = [
+                // --- ベーシック（味・香りの描写） ---
                 `「${w1}」と「${w2}」の余韻。`,
                 `まるで${w1}のような、${w2}。`,
                 `後味に${w1}を感じる、${w2}の香り。`,
-                `テーマは「${w1}」。隠し味に${w2}を。`
+                `テーマは「${w1}」。隠し味に${w2}を。`,
+                `${w1}の甘さと、${w2}の苦味の調和。`,
+                `口に含めば${w1}、喉を通れば${w2}。`,
+                `トップノートは${w1}、ラストは${w2}。`,
+                `洗練された${w1}に、一滴の${w2}を。`,
+                `その味わいは${w1}よりも深く、${w2}よりも淡い。`,
+                `${w1}をベースに、${w2}でアクセントを。`,
+
+                // --- アトモスフィア（情景・時間） ---
+                `夜明けの${w1}。黄昏の${w2}。`,
+                `雨上がりの${w1}と、路地裏の${w2}。`,
+                `真夜中の${w1}に溶ける、${w2}の光。`,
+                `都会の${w1}を忘れさせる、${w2}の静寂。`,
+                `遠い夏の${w1}、近い冬の${w2}。`,
+                `グラスの中に浮かぶ${w1}、沈む${w2}。`,
+                `かつて見た${w1}の風景。今ここにある${w2}。`,
+                `月明かりの下で味わう、${w1}と${w2}。`,
+                `騒がしい${w1}から逃れ、${w2}の海へ。`,
+                `旅の終わりの${w1}。旅の始まりの${w2}。`,
+
+                // --- コンセプチュアル（哲学・感情） ---
+                `失われた${w1}を求めて。${w2}を添えて。`,
+                `それは${w1}への問いかけ。答えは${w2}の中に。`,
+                `愛という名の${w1}。孤独という名の${w2}。`,
+                `完璧な${w1}などない。あるのは${w2}だけ。`,
+                `この一杯は、${w1}であり、${w2}でもある。`,
+                `記憶の片隅にある${w1}。予感としての${w2}。`,
+                `矛盾する${w1}と${w2}の融合。`,
+                `破壊的な${w1}。創造的な${w2}。`,
+                `儚い${w1}を閉じ込めた、永遠の${w2}。`,
+                `純粋な${w1}への憧憬と、${w2}への嫉妬。`,
+
+                // --- ショート＆パンチ（短文・抽象的） ---
+                `ただ、${w1}。そして${w2}。`,
+                `Re: ${w1} & ${w2}.`,
+                `No ${w1}, No ${w2}.`,
+                `${w1}・ミーツ・${w2}。`,
+                `究極の${w1} vs 至高の${w2}。`,
+                `0%の${w1}、100%の${w2}。`,
+                `あるいは、${w1}。もしくは、${w2}。`,
+                `刹那の${w1}。無限の${w2}。`,
+                `禁断の${w1}、約束の${w2}。`,
+                `青い${w1}。赤い${w2}。`,
+
+                // --- ストーリーテリング（物語性） ---
+                `昔々、ある${w1}が${w2}に出会った。`,
+                `彼が残した${w1}。彼女が愛した${w2}。`,
+                `その${w1}は、まるで${w2}への手紙のように。`,
+                `事件の鍵は${w1}。犯人は${w2}。`,
+                `魔法が解けた後の${w1}、夢から覚めた${w2}。`,
+                `禁酒法時代の${w1}、現代の${w2}。`,
+                `ハードボイルドな${w1}に、${w2}の優しさを。`,
+                `裏切りの${w1}、復讐の${w2}。`,
+                `天使の${w1}。悪魔の${w2}。`,
+                `終わらない${w1}の歌。響き渡る${w2}。`
             ];
             comment = randomPick(patterns);
         }
@@ -361,17 +447,14 @@
             comment: comment
         };
 
-        // 画像のプリロード（ここが速さの鍵！）
         const faceUrl = `https://xsgames.co/randomusers/avatar.php?g=${Math.random()<0.5?'male':'female'}&v=${new Date().getTime()}`;
         const bgUrl = randomPick(BG_IMAGES);
         
-        // 画像を実際に読み込んでキャッシュさせる
         const img = new Image();
         img.src = faceUrl;
         const bgImg = new Image();
         bgImg.src = bgUrl;
 
-        // 顔画像の読み込み完了を待つ（最大3秒）
         await Promise.race([
             new Promise(r => img.onload = r),
             wait(3000)
@@ -405,20 +488,26 @@
         timeBar.style.width = '0%';
         document.getElementById('status').textContent = "Brewing...";
 
-        // 演出用ウェイト（1.2秒）
         await wait(1200);
 
         try {
-            // ★ここがポイント：準備済みのデータを使う
-            // もし初回でまだデータがなければ、今すぐ生成する
             if (!nextCocktailPromise) {
                 nextCocktailPromise = generateCocktailData();
             }
             const data = await nextCocktailPromise;
             currentCocktail = data;
 
-            // DOM更新
-            document.getElementById('bg-layer').style.backgroundImage = `url('${data.bgUrl}')`;
+            // --- 背景のクロスフェード処理 ---
+            const nextBgIndex = activeBgIndex === 1 ? 2 : 1;
+            const activeBgLayer = document.getElementById(`bg-layer-${activeBgIndex}`);
+            const nextBgLayer = document.getElementById(`bg-layer-${nextBgIndex}`);
+
+            nextBgLayer.style.backgroundImage = `url('${data.bgUrl}')`;
+            nextBgLayer.classList.add('visible');
+            activeBgLayer.classList.remove('visible');
+            activeBgIndex = nextBgIndex;
+            // -----------------------------
+
             document.getElementById('bartender-icon').src = data.faceUrl;
             document.getElementById('bartender-name').textContent = `BARTENDER: ${data.bartender}`;
             document.getElementById('name-display').textContent = data.name;
@@ -430,12 +519,12 @@
             document.getElementById('recipe-alc').textContent = data.recipe.alc;
             document.getElementById('recipe-comment').textContent = data.recipe.comment;
 
+            // アワード表示（中身を変えてフェードイン）
             if (data.award) {
                 awardUI.textContent = `★ ${data.award}`;
-                awardUI.style.display = "inline-block";
                 setTimeout(() => awardUI.classList.add('show'), 300);
             } else {
-                awardUI.style.display = "none";
+                awardUI.textContent = ""; 
             }
 
             // フェードイン
@@ -443,10 +532,9 @@
             document.getElementById('status').textContent = "";
             isProcessing = false;
 
-            // ★次回の分を裏で準備開始（プリロード）
+            // 次回分プリロード
             nextCocktailPromise = generateCocktailData();
 
-            // タイマー始動
             requestAnimationFrame(() => {
                 timeBar.style.transition = 'width 20s linear';
                 timeBar.style.width = '100%';
@@ -458,14 +546,13 @@
 
         } catch (e) {
             console.error(e);
-            nextCocktailPromise = null; // エラーならリセット
-            setTimeout(serveCocktail, 500); // リトライ
+            nextCocktailPromise = null; 
+            setTimeout(serveCocktail, 500); 
             isProcessing = false;
         }
     }
 
     // --- Events ---
-    // ページ読み込み時に裏で最初の1杯目を準備開始
     window.addEventListener('DOMContentLoaded', () => {
         nextCocktailPromise = generateCocktailData();
     });
@@ -489,3 +576,4 @@
 <style>
   h1:first-of-type { display: none !important; }
 </style>
+</html>
