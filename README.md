@@ -23,7 +23,6 @@
         overflow: hidden; 
     }
 
-    /* --- Wrapper --- */
     .artifact-bar-wrapper {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -36,14 +35,9 @@
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
         background-size: cover; background-position: center;
         opacity: 0.3; filter: sepia(0.4) contrast(1.1) blur(3px);
-        transition: opacity 1s ease, background-image 1s ease; /* 背景切り替えもスムーズに */
-        background-color: #111; /* 画像がない時の保険 */
-    }
-    /* 初期画像を指定しておく */
-    #bg-layer {
+        transition: opacity 1s ease;
         background-image: url('https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop');
     }
-
     .spotlight {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background: radial-gradient(circle at center, rgba(20,20,20,0.4) 0%, rgba(0,0,0,0.95) 85%);
@@ -124,15 +118,20 @@
         display: flex; flex-direction: column; align-items: center;
         margin-bottom: 30px; width: 100%;
     }
+    
     .prefix-text, .suffix-text {
         font-size: 0.9rem; letter-spacing: 0.2em; color: #aaa; text-align: center;
     }
     
     #name-display {
-        color: #fff; font-size: clamp(1.5rem, 5vw, 2.8rem);
-        line-height: 1.3; margin: 5px 0; padding: 0; 
+        color: #fff; 
+        font-size: clamp(1.5rem, 5vw, 2.8rem);
+        line-height: 1.3; 
+        margin: 5px 0;
+        padding: 0; 
         word-wrap: break-word; width: 100%; text-align: center; white-space: normal;
-        font-weight: 500; letter-spacing: 0.05em;
+        font-weight: 500;
+        letter-spacing: 0.05em;
     }
 
     #price-display {
@@ -152,9 +151,7 @@
     }
     .recipe-item { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
     .recipe-item span { color: #555; font-size: 0.65rem; display: block; margin-bottom: 4px; letter-spacing: 0.1em; }
-    .recipe-comment { 
-        width: 100%; margin-top: 20px; font-style: italic; text-align: center; color: #bbb; font-size: 0.85rem; opacity: 0.8; letter-spacing: 0.1em;
-    }
+    .recipe-comment { width: 100%; margin-top: 20px; font-style: italic; text-align: center; color: #bbb; font-size: 0.85rem; opacity: 0.8; letter-spacing: 0.1em; }
 
     .action-bar {
         margin-top: 50px; display: flex; gap: 20px; justify-content: center;
@@ -196,6 +193,7 @@
             あなただけのカクテルをお作りします。
         </div>
         <button id="start-btn" class="start-btn">オーダーする</button>
+        <div style="margin-top: 20px; font-size: 0.7rem; color: #555;">Preparing...</div>
     </div>
 
     <div id="main-app" class="screen hidden">
@@ -233,30 +231,13 @@
     // --- Data ---
     const SAFE_WORDS = ["月光", "サイバーパンク", "シュレーディンガー", "モナ・リザ", "ミッドナイト", "レトロ", "メランコリー", "ユートピア", "シンギュラリティ", "パラドックス", "エターナル", "トワイライト", "蜃気楼", "カオス", "ノスタルジア", "リグレット", "アビス"];
     const SAFE_KATAKANA = ["アンドロメダ", "プロトコル", "エデン", "マトリックス", "リリス", "フェニックス", "リフレイン", "シンドローム", "ファントム", "クリスタル", "メトロポリス", "アルカディア", "ラグナロク", "シリウス", "プラズマ", "オメガ"];
-    const SAFE_POEMS = ["静寂と再生の味わい。", "失われた時間を求めて。", "深い夜の底で輝く光。", "記憶の片隅に残る香り。", "星の瞬きをグラスに。"];
+    const SAFE_POEMS = ["静寂と再生の味わい。", "失われた時間を求めて。", "深い夜の底で輝く光。", "記憶の片隅に残る香り。"];
     
     const BG_IMAGES = [
         "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1920&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1470337458703-46ad1756a187?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1536935338788-846bbe106599?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1543007631-23622440726d?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1583065080141-72a58b479b5a?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1578488347632-945c4953a4b6?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1597075041503-269fa1c5405b?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1574096079513-d8259312b785?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1520121401995-928cd53d49b7?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1563784462-0858916270c4?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1606923429700-87143196000f?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1581008627320-1f84126ee4e2?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1516997121675-4a2d88e0c3b7?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1577258283135-48914127c208?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1600093463592-8e36a3d5b451?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1558507652-2d966236291e?q=80&w=1920&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1570554827083-c64ac3786948?q=80&w=1920&auto=format&fit=crop"
+        "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?q=80&w=1920&auto=format&fit=crop"
     ];
 
     const BAN_KEYWORDS = ["人物", "生", "没", "氏", "家", "男", "女", "子", "王", "皇", "帝", "将軍", "選手", "歌手", "俳優", "声優", "作家", "政治", "軍人", "学者", "アイドル", "監督", "メンバー", "一覧", "出身", "在住", "年度", "世紀", "年", "月", "日", "地理", "都市", "町村", "県", "市", "区", "町", "村", "駅", "賞", "事件", "性", "セックス", "風俗", "アダルト", "エロ", "ヌード", "淫", "排泄", "糞", "尿", "便", "犯罪", "殺", "死", "暴力", "虐待", "テロ", "戦争", "兵器", "病", "障害", "菌", "毒", "差別"];
@@ -266,7 +247,8 @@
     const TASTES = ["Dry", "Medium", "Sweet", "Bitter", "Sour", "Spicy", "Refreshing"];
 
     // --- State ---
-    let currentCocktail = { name: "", price: "", recipe: {} };
+    let currentCocktail = null; // 現在表示中
+    let nextCocktailPromise = null; // ★プリロード用（次のデータ）
     let isProcessing = false;
     let offlineMode = false;
     let autoTimer = null;
@@ -289,13 +271,10 @@
 
     // --- Logic ---
     async function fetchWordFromWiki(type = "concept", retry = 0) {
-        if (retry > 4) {
-            return type === "katakana" ? randomPick(FALLBACK_KATAKANA) : randomPick(SAFE_WORDS);
-        }
+        if (retry > 4) return type === "katakana" ? randomPick(FALLBACK_KATAKANA) : randomPick(SAFE_WORDS);
         if (retry > 0) await wait(300); 
 
         let generatorParams = "generator=random&grnnamespace=0";
-        
         const url = `https://ja.wikipedia.org/w/api.php?origin=*&action=query&${generatorParams}&grnlimit=20&prop=categories&cllimit=max&format=json`;
 
         try {
@@ -327,9 +306,38 @@
         }
     }
 
-    async function generateRecipe() {
-        let comment = "";
-        
+    // --- Data Generation (Background) ---
+    // ★ここが新機能：データ生成部分を独立させた関数
+    async function generateCocktailData() {
+        let bartender, word1, word2, award, comment;
+
+        // 並列取得
+        try {
+            const results = await Promise.all([
+                fetchWordFromWiki("katakana"),
+                fetchWordFromWiki("concept"),
+                fetchWordFromWiki("katakana"),
+            ]);
+            bartender = results[0];
+            word1 = results[1];
+            word2 = results[2];
+        } catch (e) {
+            bartender = randomPick(SAFE_KATAKANA);
+            word1 = randomPick(SAFE_WORDS);
+            word2 = randomPick(SAFE_KATAKANA);
+        }
+
+        // アワード生成
+        if (Math.random() > 0.4) {
+            award = null;
+        } else {
+            const w = await fetchWordFromWiki("katakana");
+            const s = randomPick(["Award", "Prize", "Gold", "Cup", "Grand Prix", "Selection"]);
+            const y = Math.floor(Math.random() * (2050 - 1980) + 1980);
+            award = `${w} ${s} ${y}`;
+        }
+
+        // レシピ生成
         if (offlineMode) {
             comment = randomPick(SAFE_POEMS);
         } else {
@@ -339,97 +347,91 @@
                 `「${w1}」と「${w2}」の余韻。`,
                 `まるで${w1}のような、${w2}。`,
                 `後味に${w1}を感じる、${w2}の香り。`,
-                `テーマは「${w1}」。隠し味に${w2}を。`,
-                `失われた${w1}と、再生する${w2}。`,
-                `グラスの底に沈む${w1}。`,
-                `${w1}を溶かし込んだ、${w2}の雫。`
+                `テーマは「${w1}」。隠し味に${w2}を。`
             ];
             comment = randomPick(patterns);
         }
 
-        return {
+        const price = `¥${(Math.floor(Math.random() * (35 - 5) + 5) * 100).toLocaleString()}-`;
+        const recipe = {
             base: randomPick(BASES),
             style: randomPick(STYLES),
             taste: randomPick(TASTES),
             alc: Math.floor(Math.random() * (45 - 4) + 4) + "%",
             comment: comment
         };
-    }
 
-    async function generateAward() {
-        if (Math.random() > 0.4) return null;
-        const word = offlineMode ? randomPick(SAFE_KATAKANA) : await fetchWordFromWiki("katakana");
-        const suffix = randomPick(["Award", "Prize", "Gold", "Cup", "Grand Prix", "Selection"]);
-        const year = Math.floor(Math.random() * (2050 - 1980) + 1980);
-        return `${word} ${suffix} ${year}`;
+        // 画像のプリロード（ここが速さの鍵！）
+        const faceUrl = `https://xsgames.co/randomusers/avatar.php?g=${Math.random()<0.5?'male':'female'}&v=${new Date().getTime()}`;
+        const bgUrl = randomPick(BG_IMAGES);
+        
+        // 画像を実際に読み込んでキャッシュさせる
+        const img = new Image();
+        img.src = faceUrl;
+        const bgImg = new Image();
+        bgImg.src = bgUrl;
+
+        // 顔画像の読み込み完了を待つ（最大3秒）
+        await Promise.race([
+            new Promise(r => img.onload = r),
+            wait(3000)
+        ]);
+
+        return {
+            bartender,
+            name: `${word1}の${word2}`,
+            award,
+            price,
+            recipe,
+            faceUrl,
+            bgUrl
+        };
     }
 
     // --- Main Update ---
     async function serveCocktail() {
-        // UI Reset
         if (isProcessing) return;
         isProcessing = true;
         if (autoTimer) clearTimeout(autoTimer);
         
-        document.getElementById('status').textContent = "Brewing...";
         const wrapper = document.getElementById('content-wrapper');
         const awardUI = document.getElementById('award-display');
         const timeBar = document.getElementById('time-bar');
         
+        // フェードアウト
         wrapper.classList.remove('visible');
         awardUI.classList.remove('show');
         timeBar.style.transition = 'none';
         timeBar.style.width = '0%';
+        document.getElementById('status').textContent = "Brewing...";
 
+        // 演出用ウェイト（1.2秒）
         await wait(1200);
 
         try {
-            // 背景画像プリロード
-            const bgUrl = randomPick(BG_IMAGES);
-            const bgPreload = new Image();
-            bgPreload.src = bgUrl;
-
-            // データ取得（エラー時は強制的にオフラインモードで生成）
-            const [bartender, word1, word2, award, recipe] = await Promise.all([
-                fetchWordFromWiki("katakana"),
-                fetchWordFromWiki("concept"),
-                fetchWordFromWiki("katakana"),
-                generateAward(),
-                generateRecipe()
-            ]);
-            
-            const price = `¥${(Math.floor(Math.random() * (35 - 5) + 5) * 100).toLocaleString()}-`;
-            currentCocktail = { name: `${word1}の${word2}`, price, recipe };
-
-            // 顔画像プリロード
-            const faceUrl = `https://xsgames.co/randomusers/avatar.php?g=${Math.random()<0.5?'male':'female'}&v=${new Date().getTime()}`;
-            const img = new Image();
-            img.src = faceUrl;
-            
-            // 画像読み込み待ち（3秒でタイムアウトして強制進行）
-            await Promise.race([
-                Promise.all([
-                    new Promise(r => img.onload = r),
-                    new Promise(r => bgPreload.onload = r)
-                ]),
-                wait(3000)
-            ]);
+            // ★ここがポイント：準備済みのデータを使う
+            // もし初回でまだデータがなければ、今すぐ生成する
+            if (!nextCocktailPromise) {
+                nextCocktailPromise = generateCocktailData();
+            }
+            const data = await nextCocktailPromise;
+            currentCocktail = data;
 
             // DOM更新
-            document.getElementById('bg-layer').style.backgroundImage = `url('${bgUrl}')`;
-            document.getElementById('bartender-icon').src = faceUrl;
-            document.getElementById('bartender-name').textContent = `BARTENDER: ${bartender}`;
-            document.getElementById('name-display').textContent = currentCocktail.name;
-            document.getElementById('price-display').textContent = price;
+            document.getElementById('bg-layer').style.backgroundImage = `url('${data.bgUrl}')`;
+            document.getElementById('bartender-icon').src = data.faceUrl;
+            document.getElementById('bartender-name').textContent = `BARTENDER: ${data.bartender}`;
+            document.getElementById('name-display').textContent = data.name;
+            document.getElementById('price-display').textContent = data.price;
             
-            document.getElementById('recipe-base').textContent = recipe.base;
-            document.getElementById('recipe-style').textContent = recipe.style;
-            document.getElementById('recipe-taste').textContent = recipe.taste;
-            document.getElementById('recipe-alc').textContent = recipe.alc;
-            document.getElementById('recipe-comment').textContent = recipe.comment;
+            document.getElementById('recipe-base').textContent = data.recipe.base;
+            document.getElementById('recipe-style').textContent = data.recipe.style;
+            document.getElementById('recipe-taste').textContent = data.recipe.taste;
+            document.getElementById('recipe-alc').textContent = data.recipe.alc;
+            document.getElementById('recipe-comment').textContent = data.recipe.comment;
 
-            if (award) {
-                awardUI.textContent = `★ ${award}`;
+            if (data.award) {
+                awardUI.textContent = `★ ${data.award}`;
                 awardUI.style.display = "inline-block";
                 setTimeout(() => awardUI.classList.add('show'), 300);
             } else {
@@ -441,7 +443,10 @@
             document.getElementById('status').textContent = "";
             isProcessing = false;
 
-            // Timer Start
+            // ★次回の分を裏で準備開始（プリロード）
+            nextCocktailPromise = generateCocktailData();
+
+            // タイマー始動
             requestAnimationFrame(() => {
                 timeBar.style.transition = 'width 20s linear';
                 timeBar.style.width = '100%';
@@ -452,25 +457,29 @@
             }, 20000);
 
         } catch (e) {
-            // 万が一ここに来てもオフラインモードで再試行させる
             console.error(e);
-            offlineMode = true;
+            nextCocktailPromise = null; // エラーならリセット
+            setTimeout(serveCocktail, 500); // リトライ
             isProcessing = false;
-            setTimeout(serveCocktail, 500); 
         }
     }
 
     // --- Events ---
+    // ページ読み込み時に裏で最初の1杯目を準備開始
+    window.addEventListener('DOMContentLoaded', () => {
+        nextCocktailPromise = generateCocktailData();
+    });
+
     document.getElementById('start-btn').addEventListener('click', () => {
         document.getElementById('landing-page').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
-        setTimeout(serveCocktail, 500);
+        serveCocktail();
     });
 
     document.getElementById('next-btn').addEventListener('click', serveCocktail);
 
     document.getElementById('share-btn').addEventListener('click', () => {
-        if (!currentCocktail.name) return;
+        if (!currentCocktail || !currentCocktail.name) return;
         const text = `BAR EPHEMERAでオーダーしました。\n\n『${currentCocktail.name}』\n${currentCocktail.price}\n\nBase: ${currentCocktail.recipe.base} / Taste: ${currentCocktail.recipe.taste}\nコメント: ${currentCocktail.recipe.comment}\n担当: ${document.getElementById('bartender-name').textContent}\n\n#BarEphemera`;
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
         window.open(url, '_blank');
