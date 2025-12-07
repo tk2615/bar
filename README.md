@@ -1,4 +1,3 @@
-
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -36,15 +35,18 @@
     .bar-bg {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
         background-size: cover; background-position: center;
-        /* 背景が暗くなりすぎないように調整しつつ、文字を見やすく */
-        opacity: 0.3; 
-        filter: sepia(0.3) contrast(1.1) blur(4px) brightness(0.7);
-        transition: opacity 1s ease, background-image 1s ease;
-        background-color: #111; /* 画像読み込み前の保険 */
+        opacity: 0.3; filter: sepia(0.4) contrast(1.1) blur(3px);
+        transition: opacity 1s ease, background-image 1s ease; /* 背景切り替えもスムーズに */
+        background-color: #111; /* 画像がない時の保険 */
     }
+    /* 初期画像を指定しておく */
+    #bg-layer {
+        background-image: url('https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop');
+    }
+
     .spotlight {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: radial-gradient(circle at center, rgba(20,20,20,0.2) 0%, rgba(0,0,0,0.95) 85%);
+        background: radial-gradient(circle at center, rgba(20,20,20,0.4) 0%, rgba(0,0,0,0.95) 85%);
         z-index: 0; pointer-events: none;
     }
     .noise {
@@ -61,7 +63,7 @@
     }
     .hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-    /* --- Landing Page --- */
+    /* --- Landing --- */
     #landing-page { z-index: 30; width: 100%; padding: 0 20px; }
     .landing-title {
         font-family: 'Cinzel', serif !important; font-size: clamp(2.5rem, 8vw, 5rem);
@@ -88,7 +90,7 @@
         box-shadow: 0 0 25px rgba(255,255,255,0.15); letter-spacing: 0.5em;
     }
 
-    /* --- Main App UI --- */
+    /* --- Main App --- */
     #main-app { z-index: 20; width: 100%; }
     .fade-wrapper {
         opacity: 0; filter: blur(10px); transform: scale(0.97);
@@ -109,7 +111,6 @@
         letter-spacing: 0.15em; font-family: sans-serif !important; text-transform: uppercase; text-align: center;
     }
 
-    /* Award */
     #award-display {
         font-family: 'Cinzel', serif !important; font-size: 0.8rem; color: #d4af37;
         border: 1px solid #d4af37; padding: 4px 12px; margin-bottom: 20px;
@@ -119,7 +120,6 @@
     }
     #award-display.show { opacity: 1; display: inline-block; }
 
-    /* Name Group */
     .name-group {
         display: flex; flex-direction: column; align-items: center;
         margin-bottom: 30px; width: 100%;
@@ -129,17 +129,12 @@
     }
     
     #name-display {
-        color: #fff; 
-        font-size: clamp(1.5rem, 5vw, 2.8rem);
-        line-height: 1.3; 
-        margin: 5px 0;
-        padding: 0; 
+        color: #fff; font-size: clamp(1.5rem, 5vw, 2.8rem);
+        line-height: 1.3; margin: 5px 0; padding: 0; 
         word-wrap: break-word; width: 100%; text-align: center; white-space: normal;
-        font-weight: 500;
-        letter-spacing: 0.05em;
+        font-weight: 500; letter-spacing: 0.05em;
     }
 
-    /* Price */
     #price-display {
         font-family: "Garamond", serif !important; font-size: 1.4rem; color: #c0b283;
         margin-bottom: 40px; font-style: italic; letter-spacing: 0.1em; text-align: center;
@@ -150,24 +145,17 @@
         margin: 0 auto 15px auto;
     }
 
-    /* Recipe */
     .recipe-card {
         font-size: 0.85rem; color: #999; line-height: 1.8;
         border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: 0; width: 100%;
         display: flex; flex-wrap: wrap; justify-content: center; gap: 15px 30px; text-align: center;
     }
-    .recipe-item {
-        display: flex; flex-direction: column; align-items: center; min-width: 60px;
-    }
-    .recipe-item span { 
-        color: #555; font-size: 0.65rem; display: block; margin-bottom: 4px; letter-spacing: 0.1em;
-    }
+    .recipe-item { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
+    .recipe-item span { color: #555; font-size: 0.65rem; display: block; margin-bottom: 4px; letter-spacing: 0.1em; }
     .recipe-comment { 
-        width: 100%; margin-top: 20px; font-style: italic; text-align: center; color: #bbb; font-size: 0.85rem; opacity: 0.8;
-        letter-spacing: 0.1em;
+        width: 100%; margin-top: 20px; font-style: italic; text-align: center; color: #bbb; font-size: 0.85rem; opacity: 0.8; letter-spacing: 0.1em;
     }
 
-    /* Action Buttons */
     .action-bar {
         margin-top: 50px; display: flex; gap: 20px; justify-content: center;
         opacity: 0; transition: opacity 1s 1s;
@@ -180,7 +168,6 @@
     }
     .action-btn:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,0.05); }
 
-    /* Status & Timer */
     #status {
         position: fixed; bottom: 20px; right: 20px; font-size: 0.7rem;
         color: #444; font-family: sans-serif !important; letter-spacing: 0.1em; z-index: 100;
@@ -248,7 +235,6 @@
     const SAFE_KATAKANA = ["アンドロメダ", "プロトコル", "エデン", "マトリックス", "リリス", "フェニックス", "リフレイン", "シンドローム", "ファントム", "クリスタル", "メトロポリス", "アルカディア", "ラグナロク", "シリウス", "プラズマ", "オメガ"];
     const SAFE_POEMS = ["静寂と再生の味わい。", "失われた時間を求めて。", "深い夜の底で輝く光。", "記憶の片隅に残る香り。", "星の瞬きをグラスに。"];
     
-    // ★修正：確実に表示されるUnsplashの直リンク集（20枚以上）
     const BG_IMAGES = [
         "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1920&auto=format&fit=crop",
@@ -309,6 +295,7 @@
         if (retry > 0) await wait(300); 
 
         let generatorParams = "generator=random&grnnamespace=0";
+        
         const url = `https://ja.wikipedia.org/w/api.php?origin=*&action=query&${generatorParams}&grnlimit=20&prop=categories&cllimit=max&format=json`;
 
         try {
@@ -340,7 +327,6 @@
         }
     }
 
-    // レシピ生成
     async function generateRecipe() {
         let comment = "";
         
@@ -380,6 +366,7 @@
 
     // --- Main Update ---
     async function serveCocktail() {
+        // UI Reset
         if (isProcessing) return;
         isProcessing = true;
         if (autoTimer) clearTimeout(autoTimer);
@@ -389,27 +376,20 @@
         const awardUI = document.getElementById('award-display');
         const timeBar = document.getElementById('time-bar');
         
-        timeBar.style.transition = 'none';
-        timeBar.style.width = '0%';
-        
         wrapper.classList.remove('visible');
         awardUI.classList.remove('show');
+        timeBar.style.transition = 'none';
+        timeBar.style.width = '0%';
 
         await wait(1200);
 
         try {
-            // 背景画像のランダム切り替え
+            // 背景画像プリロード
             const bgUrl = randomPick(BG_IMAGES);
-            const bgLayer = document.getElementById('bg-layer');
-            bgLayer.style.opacity = 0; // フェードアウト
-            
-            // 少し待ってから切り替え
-            setTimeout(() => {
-                bgLayer.style.backgroundImage = `url('${bgUrl}')`;
-                bgLayer.style.opacity = 0.3; // フェードイン
-            }, 600);
+            const bgPreload = new Image();
+            bgPreload.src = bgUrl;
 
-            // 並列取得
+            // データ取得（エラー時は強制的にオフラインモードで生成）
             const [bartender, word1, word2, award, recipe] = await Promise.all([
                 fetchWordFromWiki("katakana"),
                 fetchWordFromWiki("concept"),
@@ -421,16 +401,22 @@
             const price = `¥${(Math.floor(Math.random() * (35 - 5) + 5) * 100).toLocaleString()}-`;
             currentCocktail = { name: `${word1}の${word2}`, price, recipe };
 
+            // 顔画像プリロード
             const faceUrl = `https://xsgames.co/randomusers/avatar.php?g=${Math.random()<0.5?'male':'female'}&v=${new Date().getTime()}`;
             const img = new Image();
             img.src = faceUrl;
             
-            // プリロード
-            const bgPreload = new Image();
-            bgPreload.src = bgUrl;
+            // 画像読み込み待ち（3秒でタイムアウトして強制進行）
+            await Promise.race([
+                Promise.all([
+                    new Promise(r => img.onload = r),
+                    new Promise(r => bgPreload.onload = r)
+                ]),
+                wait(3000)
+            ]);
 
-            await Promise.race([ new Promise(r => img.onload = r), wait(2000) ]);
-
+            // DOM更新
+            document.getElementById('bg-layer').style.backgroundImage = `url('${bgUrl}')`;
             document.getElementById('bartender-icon').src = faceUrl;
             document.getElementById('bartender-name').textContent = `BARTENDER: ${bartender}`;
             document.getElementById('name-display').textContent = currentCocktail.name;
@@ -450,6 +436,7 @@
                 awardUI.style.display = "none";
             }
 
+            // フェードイン
             wrapper.classList.add('visible');
             document.getElementById('status').textContent = "";
             isProcessing = false;
@@ -465,9 +452,11 @@
             }, 20000);
 
         } catch (e) {
+            // 万が一ここに来てもオフラインモードで再試行させる
             console.error(e);
-            setTimeout(serveCocktail, 1000);
+            offlineMode = true;
             isProcessing = false;
+            setTimeout(serveCocktail, 500); 
         }
     }
 
