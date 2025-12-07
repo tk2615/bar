@@ -3,7 +3,11 @@
     @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
 
-    /* リセットCSS & ベース設定 */
+    /* ★修正1：レイアウト崩れを防ぐための基本設定 */
+    * {
+        box-sizing: border-box;
+    }
+
     body, html {
         margin: 0 !important;
         padding: 0 !important;
@@ -15,10 +19,11 @@
         overflow: hidden; 
     }
 
+    /* ★修正2：100vwだとスクロールバー分ずれることがあるので100%に変更 */
     .artifact-bar-wrapper {
         position: relative;
-        width: 100vw;
-        height: 100vh; /* スマホのアドレスバー対策でdvh推奨やけど互換性重視でvh */
+        width: 100%;
+        height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -30,8 +35,8 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         z-index: 0;
         background-image: url('https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop'); 
         background-size: cover;
@@ -44,8 +49,8 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         background: radial-gradient(circle at center, rgba(30,30,30,0.3) 0%, rgba(0,0,0,0.95) 90%);
         z-index: 1;
         pointer-events: none;
@@ -55,8 +60,8 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         opacity: 0.08;
         pointer-events: none;
         z-index: 2;
@@ -68,7 +73,8 @@
         position: relative;
         z-index: 10;
         text-align: center;
-        width: 90%; /* スマホで横幅いっぱいに使う */
+        width: 100%; /* 横幅いっぱい */
+        padding: 0 20px; /* 左右に少し余裕を持たせる */
         max-width: 600px;
         display: flex;
         flex-direction: column;
@@ -130,7 +136,7 @@
         transform: translateY(10px);
         transition: all 1s ease;
         display: none;
-        max-width: 90%; /* はみ出し防止 */
+        max-width: 100%;
         word-wrap: break-word;
     }
     #award-display.show {
@@ -146,7 +152,6 @@
         font-weight: 500;
         margin: 5px 0;
         color: #e0e0e0;
-        /* ★修正：改行を許可する */
         white-space: normal;
         word-wrap: break-word;
         overflow-wrap: break-word;
@@ -158,10 +163,9 @@
         padding-bottom: 15px;
         margin-bottom: 20px;
         margin-top: 10px;
-        /* ★修正：スマホではみ出さないようにサイズ調整＆改行許可 */
         font-size: clamp(1.8rem, 7vw, 3.2rem); 
-        width: 100%; /* 横幅いっぱい使う */
-        line-height: 1.3; /* 行間を少し詰める */
+        width: 100%;
+        line-height: 1.3;
         white-space: normal;
         word-wrap: break-word;
         overflow-wrap: break-word;
@@ -172,7 +176,6 @@
         font-size: clamp(1.0rem, 4vw, 1.5rem);
         color: #c0b283; 
         letter-spacing: 0.1em;
-        /* ★修正：一番下へ移動するためのマージン */
         margin-top: 40px; 
         margin-bottom: 10px;
         font-style: italic;
@@ -189,13 +192,12 @@
         z-index: 20;
     }
 
-    /* スマホ調整 */
     @media screen and (max-width: 480px) {
         #bartender-icon { width: 80px; height: 80px; }
         .uniform-text { font-size: 1.0rem; }
-        /* カクテル名が長すぎるとき用 */
-        #name-display { font-size: 1.6rem; margin-left: auto; margin-right: auto; }
-        #container { width: 95%; } /* 余白を減らす */
+        #name-display { font-size: 1.6rem; }
+        /* コンテナの幅調整 */
+        #container { width: 100%; padding: 0 15px; } 
     }
 </style>
 
@@ -231,13 +233,33 @@
     const awardDisplay = document.getElementById('award-display');
     const statusDisplay = document.getElementById('status');
 
-    const banKeywords = ["人物", "生", "没", "氏", "家", "男", "女", "子", "王", "皇", "帝", "将軍", "大名", "武将", "貴族", "選手", "歌手", "俳優", "声優", "作家", "政治家", "軍人", "学者", "実業家", "画家", "タレント", "アイドル", "監督", "グループ", "メンバー", "人々", "一覧", "出身", "在住", "年度", "世紀", "年", "月", "日", "地理", "都市", "町村", "都", "道", "府", "県", "市", "区", "町", "村", "郡", "国", "地域", "場所", "駅", "賞", "事件"];
+    // ★修正3：NGワードリスト大幅強化（下ネタ・犯罪・不快語フィルター）
+    const banKeywords = [
+        // 人名・固有名詞系
+        "人物", "生", "没", "氏", "家", "男", "女", "子", "王", "皇", "帝", "将軍", "大名", "武将", "貴族",
+        "選手", "歌手", "俳優", "声優", "作家", "政治家", "軍人", "学者", "実業家", "画家", "タレント", "アイドル", "監督",
+        "グループ", "メンバー", "人々", "一覧", "出身", "在住", "年度", "世紀", "年", "月", "日",
+        
+        // 地理系
+        "地理", "都市", "町村", "都", "道", "府", "県", "市", "区", "町", "村", "郡", "国", "地域", "場所", "駅",
+        
+        // ★ここから追加：下ネタ・NGワード系
+        "性", "セックス", "風俗", "アダルト", "ポルノ", "エロ", "ヌード", "淫", "精子", "卵子", "生殖",
+        "排泄", "糞", "尿", "便",
+        "犯罪", "事件", "事故", "殺人", "死体", "遺体", "暴力", "虐待", "テロ", "戦争", "兵器",
+        "病気", "障害", "症候群", "ウイルス", "感染", "中毒", "差別"
+    ];
 
     function cleanWord(word) { return word.replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').replace(/_/g, ' ').replace(/一覧/g, '').replace(/カテゴリー:/g, '').trim(); }
     
     function isValidConcept(pageData) {
         const title = pageData.title;
+        // タイトル自体に含まれてはいけない文字
         if (title.includes("氏") || title.includes("天皇") || /^[0-9]+$/.test(title)) return false;
+        
+        // ★タイトル自体にNGワードが含まれていないかもチェック
+        if (banKeywords.some(keyword => title.includes(keyword))) return false;
+
         if (!pageData.categories) return true; 
         for (let cat of pageData.categories) {
             if (banKeywords.some(keyword => cat.title.includes(keyword))) return false;
@@ -245,7 +267,6 @@
         return true;
     }
 
-    // ★修正：価格帯を500円〜3000円に変更
     function generatePrice() {
         const min = 5;  // 500円
         const max = 30; // 3000円
