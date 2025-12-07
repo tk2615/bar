@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -129,7 +129,7 @@
     
     #name-display {
         color: #fff; 
-        font-size: clamp(1.5rem, 5vw, 2.5rem); /* フォントサイズ調整済み */
+        font-size: clamp(1.5rem, 5vw, 2.8rem);
         line-height: 1.3; 
         margin: 5px 0;
         padding: 0; 
@@ -246,7 +246,12 @@
     // APIダウン時のバックアップ
     const SAFE_WORDS = ["月光", "サイバーパンク", "シュレーディンガー", "モナ・リザ", "ミッドナイト", "レトロ", "メランコリー", "ユートピア", "シンギュラリティ", "パラドックス", "エターナル", "トワイライト", "蜃気楼", "カオス", "ノスタルジア", "リグレット", "アビス"];
     const SAFE_KATAKANA = ["アンドロメダ", "プロトコル", "エデン", "マトリックス", "リリス", "フェニックス", "リフレイン", "シンドローム", "ファントム", "クリスタル", "メトロポリス", "アルカディア", "ラグナロク", "シリウス", "プラズマ", "オメガ"];
-    const SAFE_POEMS = ["静寂と再生の味わい。", "失われた時間を求めて。", "深い夜の底で輝く光。", "記憶の片隅に残る香り。"];
+    
+    // ★バックアップ用のコメントもバリエーションを増やす
+    const SAFE_POEMS = [
+        "静寂と再生の味わい。", "失われた時間を求めて。", "深い夜の底で輝く光。", "記憶の片隅に残る香り。",
+        "終わりのない夢の続き。", "言葉にできない感情を溶かして。", "透明な哀しみが胸を刺す。", "遠い星からのメッセージ。"
+    ];
     
     const BG_IMAGES = [
         "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop",
@@ -286,13 +291,12 @@
     // --- Logic ---
     async function fetchWordFromWiki(type = "concept", retry = 0) {
         if (retry > 4) {
-            return type === "katakana" ? randomPick(FALLBACK_KATAKANA) : randomPick(FALLBACK_WORDS);
+            return type === "katakana" ? randomPick(FALLBACK_KATAKANA) : randomPick(SAFE_WORDS);
         }
         if (retry > 0) await wait(300); 
 
-        let generatorParams = "generator=random&grnnamespace=0";
-        
-        const url = `https://ja.wikipedia.org/w/api.php?origin=*&action=query&${generatorParams}&grnlimit=20&prop=categories&cllimit=max&format=json`;
+        // generator=randomで広範囲から取得
+        const url = `https://ja.wikipedia.org/w/api.php?origin=*&action=query&generator=random&grnnamespace=0&grnlimit=20&prop=categories&cllimit=max&format=json`;
 
         try {
             const controller = new AbortController();
@@ -311,7 +315,9 @@
                 if (type === "katakana") {
                     if (/^[ァ-ヶー・＝=]+$/.test(title) && title.length >= 2 && title.length <= 15) return title;
                 } else if (type === "poetic") {
-                    if (!/^[0-9]+$/.test(title) && title.length >= 2 && title.length <= 6) return title;
+                    // ポエム用：漢字混じりOKだが、短めで抽象的なものを狙う
+                    // 数字だけでない、長すぎない、スペースを含まない
+                    if (!/^[0-9]+$/.test(title) && title.length >= 2 && title.length <= 8 && !title.includes(" ")) return title;
                 } else {
                     if (title.length >= 2 && title.length <= 10 && !title.includes(" ")) return title;
                 }
@@ -323,19 +329,26 @@
         }
     }
 
+    // ★レシピコメントも動的生成（テンプレ完全廃止）
     async function generateRecipe() {
         let comment = "";
         
         if (offlineMode) {
             comment = randomPick(SAFE_POEMS);
         } else {
+            // ネットから2つの言葉を拾ってきて組み合わせる
             const w1 = await fetchWordFromWiki("poetic");
             const w2 = await fetchWordFromWiki("poetic");
+            
+            // 文章の繋ぎ方だけは最低限のパターンを用意（中身は毎回変わる）
             const patterns = [
                 `「${w1}」と「${w2}」の余韻。`,
                 `まるで${w1}のような、${w2}。`,
                 `後味に${w1}を感じる、${w2}の香り。`,
-                `テーマは「${w1}」。隠し味に${w2}を。`
+                `テーマは「${w1}」。隠し味に${w2}を。`,
+                `失われた${w1}と、再生する${w2}。`,
+                `グラスの底に沈む${w1}。`,
+                `${w1}を溶かし込んだ、${w2}の雫。`
             ];
             comment = randomPick(patterns);
         }
