@@ -10,6 +10,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400&display=swap');
 
+    /* --- Reset & Base --- */
     * { box-sizing: border-box; }
 
     body, html {
@@ -23,6 +24,7 @@
         overflow: hidden; 
     }
 
+    /* --- Wrapper (画面全体固定) --- */
     .artifact-bar-wrapper {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -57,7 +59,7 @@
     }
     .hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-    /* --- Landing --- */
+    /* --- Landing Page --- */
     #landing-page { z-index: 30; width: 100%; padding: 0 20px; }
     .landing-title {
         font-family: 'Cinzel', serif !important; font-size: clamp(2.5rem, 8vw, 5rem);
@@ -84,7 +86,7 @@
         box-shadow: 0 0 25px rgba(255,255,255,0.15); letter-spacing: 0.5em;
     }
 
-    /* --- Main App --- */
+    /* --- Main App UI --- */
     #main-app { z-index: 20; width: 100%; }
     .fade-wrapper {
         opacity: 0; filter: blur(10px); transform: scale(0.97);
@@ -94,6 +96,7 @@
     }
     .fade-wrapper.visible { opacity: 1; filter: blur(0); transform: scale(1); }
 
+    /* Bartender */
     #bartender-icon {
         width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
         border: 1px solid rgba(150, 150, 150, 0.4); box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
@@ -105,7 +108,7 @@
         letter-spacing: 0.15em; font-family: sans-serif !important; text-transform: uppercase; text-align: center;
     }
 
-    /* --- Award --- */
+    /* Award */
     #award-display {
         font-family: 'Cinzel', serif !important; font-size: 0.8rem; color: #d4af37;
         border: 1px solid #d4af37; padding: 4px 12px; margin-bottom: 20px;
@@ -115,11 +118,12 @@
     }
     #award-display.show { opacity: 1; display: inline-block; }
 
-    /* --- Name Group --- */
+    /* Name Group (Grouping) */
     .name-group {
         display: flex; flex-direction: column; align-items: center;
         margin-bottom: 30px; width: 100%;
     }
+    
     .prefix-text, .suffix-text {
         font-size: 0.9rem; letter-spacing: 0.2em; color: #aaa; text-align: center;
     }
@@ -131,11 +135,10 @@
         margin: 5px 0;
         padding: 0; 
         word-wrap: break-word; width: 100%; text-align: center; white-space: normal;
-        font-weight: 500;
-        letter-spacing: 0.05em;
+        font-weight: 500; letter-spacing: 0.05em;
     }
 
-    /* --- Price --- */
+    /* Price (Separated) */
     #price-display {
         font-family: "Garamond", serif !important; font-size: 1.4rem; color: #c0b283;
         margin-bottom: 40px; font-style: italic; letter-spacing: 0.1em; text-align: center;
@@ -146,7 +149,7 @@
         margin: 0 auto 15px auto;
     }
 
-    /* --- Recipe --- */
+    /* Recipe (Centered) */
     .recipe-card {
         font-size: 0.85rem; color: #999; line-height: 1.8;
         border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: 0; width: 100%;
@@ -163,7 +166,7 @@
         letter-spacing: 0.1em;
     }
 
-    /* --- Action --- */
+    /* Action Buttons */
     .action-bar {
         margin-top: 50px; display: flex; gap: 20px; justify-content: center;
         opacity: 0; transition: opacity 1s 1s;
@@ -176,7 +179,7 @@
     }
     .action-btn:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,0.05); }
 
-    /* --- Status & Timer --- */
+    /* Status & Timer */
     #status {
         position: fixed; bottom: 20px; right: 20px; font-size: 0.7rem;
         color: #444; font-family: sans-serif !important; letter-spacing: 0.1em; z-index: 100;
@@ -283,16 +286,12 @@
     // --- Logic ---
     async function fetchWordFromWiki(type = "concept", retry = 0) {
         if (retry > 4) {
-            return type === "katakana" ? randomPick(FALLBACK_KATAKANA) : randomPick(FALLBACK_WORDS);
+            return type === "katakana" ? randomPick(FALLBACK_KATAKANA) : randomPick(SAFE_WORDS);
         }
         if (retry > 0) await wait(300); 
 
-        // typeによって検索ターゲットを変える
-        // poetic: 美意識や感情、哲学など
-        // katakana: カタカナ語
         let generatorParams = "";
         if (type === "poetic") {
-             // カテゴリを指定して取得するアプローチ（今回はランダムから抽出する簡易版）
              generatorParams = "generator=random&grnnamespace=0";
         } else {
              generatorParams = "generator=random&grnnamespace=0";
@@ -317,7 +316,6 @@
                 if (type === "katakana") {
                     if (/^[ァ-ヶー・＝=]+$/.test(title) && title.length >= 2 && title.length <= 15) return title;
                 } else if (type === "poetic") {
-                    // 漢字やひらがなを含む、短めの言葉（概念っぽいもの）
                     if (!/^[0-9]+$/.test(title) && title.length >= 2 && title.length <= 6) return title;
                 } else {
                     if (title.length >= 2 && title.length <= 10 && !title.includes(" ")) return title;
@@ -330,10 +328,7 @@
         }
     }
 
-    // ★修正箇所：レシピのコメントも動的に生成
     async function generateRecipe() {
-        // コメント用の単語を2つ取得
-        // 失敗したらストックから
         let comment = "";
         if (offlineMode) {
             comment = randomPick(SAFE_POEMS);
@@ -379,8 +374,6 @@
 
         await wait(1200);
 
-        // 並列で取得
-        // comment生成のために generateRecipe も非同期に変更
         const [bartender, word1, word2, award, recipe] = await Promise.all([
             fetchWordFromWiki("katakana"),
             fetchWordFromWiki("concept"),
@@ -444,7 +437,7 @@
 
     document.getElementById('share-btn').addEventListener('click', () => {
         if (!currentCocktail.name) return;
-        const text = `BAR EPHEMERAでオーダーしました。\n\n『${currentCocktail.name}』\n${currentCocktail.price}\n\nBase: ${currentCocktail.recipe.base} / Taste: ${currentCocktail.recipe.taste}\nコメント: ${currentCocktail.recipe.comment}\n担当: ${document.getElementById('bartender-name').textContent}\n\n#BarEphemera #ArtifactBar`;
+        const text = `BAR EPHEMERAでオーダーしました。\n\n『${currentCocktail.name}』\n${currentCocktail.price}\n\nBase: ${currentCocktail.recipe.base} / Taste: ${currentCocktail.recipe.taste}\nコメント: ${currentCocktail.recipe.comment}\n担当: ${document.getElementById('bartender-name').textContent}\n\n#BarEphemera`;
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
         window.open(url, '_blank');
     });
