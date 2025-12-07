@@ -1,8 +1,14 @@
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Bar Experience - Silent</title>
+    <title>The Bar Experience - Shippori Mincho</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700&display=swap" rel="stylesheet">
+
     <style>
         /* ベース設定 */
         body, html {
@@ -12,7 +18,8 @@
             height: 100%;
             background-color: #050505;
             color: #e0d8c8;
-            font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "HGS Mincho E", "MS PMincho", serif;
+            /* フォント指定を「Shippori Mincho」最優先に変更 */
+            font-family: 'Shippori Mincho', "Yu Mincho", "YuMincho", serif;
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -28,7 +35,7 @@
             width: 100%;
             height: 100%;
             z-index: -3;
-            /* 背景画像 */
+            /* 背景画像（Unsplashのバーカウンター画像） */
             background-image: url('https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop'); 
             background-size: cover;
             background-position: center;
@@ -107,11 +114,11 @@
             color: #888;
             margin-bottom: 30px;
             letter-spacing: 0.15em;
-            font-family: sans-serif;
+            font-family: sans-serif; /* ここだけは英語なのでゴシック系でもOK */
             text-transform: uppercase;
         }
 
-        /* 統一テキストスタイル */
+        /* 統一テキストスタイル（しっぽり明朝が適用される） */
         .uniform-text {
             font-size: clamp(1.5rem, 4vw, 3.0rem);
             line-height: 1.6;
@@ -131,6 +138,7 @@
 
         /* 金額 */
         #price-display {
+            /* 金額は高級感のあるセリフ体で */
             font-family: "Garamond", "Times New Roman", serif;
             font-size: clamp(1.2rem, 3vw, 2.0rem);
             color: #c0b283; 
@@ -170,7 +178,7 @@
         </div>
     </div>
 
-    <div id="status">System Ready.</div>
+    <div id="status">Font Loading...</div>
 
     <script>
         const contentWrapper = document.getElementById('content-wrapper');
@@ -180,24 +188,21 @@
         const bartenderNameDisplay = document.getElementById('bartender-name');
         const statusDisplay = document.getElementById('status');
 
-        // 人名・地名などを徹底排除するNGワード
         const banKeywords = ["人物", "生", "没", "氏", "家", "男", "女", "子", "王", "皇", "帝", "将軍", "大名", "武将", "貴族", "選手", "歌手", "俳優", "声優", "作家", "政治家", "軍人", "学者", "実業家", "画家", "タレント", "アイドル", "監督", "グループ", "メンバー", "人々", "一覧", "出身", "在住", "年度", "世紀", "年", "月", "日", "地理", "都市", "町村", "都", "道", "府", "県", "市", "区", "町", "村", "郡", "国", "地域", "場所", "駅"];
 
         function cleanWord(word) { return word.replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').replace(/_/g, ' ').replace(/一覧/g, '').replace(/カテゴリー:/g, '').trim(); }
         
         function isValidConcept(pageData) {
             const title = pageData.title;
-            // タイトル自体に人名っぽい要素があれば弾く
             if (title.includes("氏") || title.includes("天皇") || /^[0-9]+$/.test(title)) return false;
             
-            if (!pageData.categories) return true; // カテゴリなしは一応通す（自己責任）
+            if (!pageData.categories) return true; 
             for (let cat of pageData.categories) {
                 if (banKeywords.some(keyword => cat.title.includes(keyword))) return false;
             }
             return true;
         }
 
-        // 800円〜3500円のリアルな価格帯
         function generatePrice() {
             const min = 8; 
             const max = 35;
@@ -205,17 +210,14 @@
             return `¥${price.toLocaleString()}-`;
         }
 
-        // AI生成顔アイコンURL（ランダム）
         function getNewAIFaceUrl() {
             const gender = Math.random() < 0.5 ? 'male' : 'female';
             return `https://xsgames.co/randomusers/avatar.php?g=${gender}&v=${new Date().getTime()}`;
         }
 
-        // カタカナ単語のみを抽出する（バーテンダー名・カクテル名用）
         async function fetchKatakanaWord(retryCount = 0) {
-            if (retryCount > 10) return "カオス"; // 諦め
+            if (retryCount > 10) return "カオス"; 
 
-            // 完全ランダム取得
             const url = "https://ja.wikipedia.org/w/api.php?origin=*&action=query&generator=random&grnnamespace=0&grnlimit=50&prop=categories&cllimit=max&format=json";
             
             try {
@@ -229,7 +231,6 @@
                     const title = cleanWord(page.title);
 
                     if (isValidConcept(page)) {
-                        // カタカナのみ（中黒・長音・イコール含む）で構成されているかチェック
                         if (/^[ァ-ヶー・＝=]+$/.test(title) && title.length >= 2 && title.length <= 15) {
                             return title;
                         }
@@ -241,7 +242,6 @@
             }
         }
 
-        // 概念ワード（前半）を取得（漢字混じりOK）
         async function fetchConceptWord(retryCount = 0) {
             if (retryCount > 8) return "無限"; 
             const url = "https://ja.wikipedia.org/w/api.php?origin=*&action=query&generator=random&grnnamespace=0&grnlimit=20&prop=categories&cllimit=max&format=json";
@@ -264,9 +264,9 @@
         async function fetchMaterial() {
             try {
                 const [bartenderName, conceptWord, alcoholWord] = await Promise.all([
-                    fetchKatakanaWord(), // バーテンダー名（カタカナ）
-                    fetchConceptWord(),  // 前半
-                    fetchKatakanaWord()  // 後半（カタカナ縛り）
+                    fetchKatakanaWord(),
+                    fetchConceptWord(),
+                    fetchKatakanaWord()
                 ]);
 
                 return {
@@ -283,8 +283,6 @@
             
             setTimeout(async () => {
                 const newImageSrc = getNewAIFaceUrl();
-                
-                // 画像読み込みとテキスト生成を待機
                 const [data] = await Promise.all([
                     fetchMaterial(),
                     new Promise((resolve) => {
@@ -299,9 +297,8 @@
                     bartenderNameDisplay.textContent = `Bartender: ${data.bartender}`;
                     nameDisplay.textContent = data.cocktail;
                     priceDisplay.textContent = generatePrice();
-                    
                     contentWrapper.classList.add('visible');
-                    statusDisplay.textContent = ""; // 完了したらステータス消す
+                    statusDisplay.textContent = ""; 
                     setTimeout(serveCocktail, 10000); 
                 } else {
                     serveCocktail();
@@ -312,11 +309,5 @@
         serveCocktail();
 
     </script>
-    <style>
-  /* 最初の見出し（h1）を消す */
-  h1:first-of-type {
-    display: none !important;
-  }
-</style>
 </body>
 </html>
