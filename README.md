@@ -575,4 +575,3 @@
 <style>
   h1:first-of-type { display: none !important; }
 </style>
-</html>
