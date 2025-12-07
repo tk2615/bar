@@ -3,10 +3,8 @@
     @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
 
-    /* ★修正1：レイアウト崩れを防ぐための基本設定 */
-    * {
-        box-sizing: border-box;
-    }
+    /* リセット & ベース設定 */
+    * { box-sizing: border-box; }
 
     body, html {
         margin: 0 !important;
@@ -19,7 +17,6 @@
         overflow: hidden; 
     }
 
-    /* ★修正2：100vwだとスクロールバー分ずれることがあるので100%に変更 */
     .artifact-bar-wrapper {
         position: relative;
         width: 100%;
@@ -30,7 +27,7 @@
         overflow: hidden;
     }
 
-    /* 背景 */
+    /* --- 背景レイヤー（共通） --- */
     .bar-bg {
         position: fixed;
         top: 0;
@@ -44,7 +41,6 @@
         opacity: 0.25; 
         filter: sepia(0.3) contrast(1.1) blur(2px);
     }
-
     .spotlight {
         position: fixed;
         top: 0;
@@ -55,7 +51,6 @@
         z-index: 1;
         pointer-events: none;
     }
-
     .noise {
         position: fixed;
         top: 0;
@@ -68,21 +63,76 @@
         background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2cpIiBvcGFjaXR5PSIxIi8+PC9zdmc+');
     }
 
-    /* コンテナ */
-    #container {
-        position: relative;
+    /* --- 画面切り替え用ユーティリティ --- */
+    .screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         z-index: 10;
-        text-align: center;
-        width: 100%; /* 横幅いっぱい */
-        padding: 0 20px; /* 左右に少し余裕を持たせる */
-        max-width: 600px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        text-shadow: 0 0 15px rgba(200, 180, 150, 0.3);
+        transition: opacity 1.5s ease-in-out, visibility 1.5s;
+    }
+    .hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
     }
 
+    /* --- トップページ（エントランス）のスタイル --- */
+    #landing-page {
+        z-index: 20; /* 生成画面より手前 */
+    }
+
+    .landing-title {
+        font-family: 'Cinzel', serif !important;
+        font-size: clamp(2rem, 6vw, 4rem);
+        color: #fff;
+        letter-spacing: 0.2em;
+        margin-bottom: 30px;
+        text-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+
+    .landing-text {
+        font-size: clamp(1rem, 3vw, 1.2rem);
+        line-height: 2.2;
+        letter-spacing: 0.15em;
+        margin-bottom: 60px;
+        text-align: center;
+        opacity: 0.9;
+    }
+
+    .start-btn {
+        padding: 15px 40px;
+        border: 1px solid rgba(255,255,255,0.3);
+        background: rgba(0,0,0,0.2);
+        color: #e0d8c8;
+        font-family: 'Shippori Mincho', serif;
+        font-size: 1.1rem;
+        letter-spacing: 0.2em;
+        cursor: pointer;
+        transition: all 0.5s ease;
+        text-decoration: none;
+    }
+    .start-btn:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.8);
+        box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        letter-spacing: 0.4em;
+    }
+
+    /* --- 生成画面（メイン）のスタイル --- */
+    #main-app-container {
+        width: 90%;
+        max-width: 600px;
+        text-align: center;
+    }
+
+    /* フェードアニメーション（生成時） */
     .fade-wrapper {
         opacity: 0;
         filter: blur(10px) grayscale(50%);
@@ -99,6 +149,7 @@
         transform: scale(1);
     }
 
+    /* パーツ類 */
     #bartender-icon {
         width: 100px;
         height: 100px;
@@ -111,7 +162,6 @@
         transition: filter 3s ease;
         background-color: #000;
     }
-
     #bartender-name {
         font-size: 0.7rem;
         color: #888;
@@ -120,7 +170,6 @@
         font-family: sans-serif !important;
         text-transform: uppercase;
     }
-
     #award-display {
         font-family: 'Cinzel', serif !important;
         font-size: 0.8rem;
@@ -136,7 +185,7 @@
         transform: translateY(10px);
         transition: all 1s ease;
         display: none;
-        max-width: 100%;
+        max-width: 90%;
         word-wrap: break-word;
     }
     #award-display.show {
@@ -144,7 +193,6 @@
         transform: translateY(0);
         display: inline-block;
     }
-
     .uniform-text {
         font-size: clamp(1.0rem, 4vw, 1.5rem);
         line-height: 2.0;
@@ -156,7 +204,6 @@
         word-wrap: break-word;
         overflow-wrap: break-word;
     }
-
     #name-display {
         color: #fff;
         border-bottom: 1px solid rgba(150, 150, 150, 0.3);
@@ -170,7 +217,6 @@
         word-wrap: break-word;
         overflow-wrap: break-word;
     }
-
     #price-display {
         font-family: "Garamond", "Times New Roman", serif !important;
         font-size: clamp(1.0rem, 4vw, 1.5rem);
@@ -180,7 +226,6 @@
         margin-bottom: 10px;
         font-style: italic;
     }
-
     #status {
         position: fixed;
         bottom: 15px;
@@ -195,9 +240,10 @@
     @media screen and (max-width: 480px) {
         #bartender-icon { width: 80px; height: 80px; }
         .uniform-text { font-size: 1.0rem; }
-        #name-display { font-size: 1.6rem; }
-        /* コンテナの幅調整 */
-        #container { width: 100%; padding: 0 15px; } 
+        #name-display { font-size: 1.6rem; margin-left: auto; margin-right: auto; }
+        #main-app-container { width: 100%; padding: 0 15px; } 
+        .landing-title { font-size: 2rem; }
+        .landing-text { font-size: 0.9rem; width: 80%; margin-left: auto; margin-right: auto; }
     }
 </style>
 
@@ -206,25 +252,41 @@
     <div class="spotlight"></div>
     <div class="noise"></div>
 
-    <div id="container">
-        <div id="content-wrapper" class="fade-wrapper">
-            <img id="bartender-icon" src="" alt="">
-            <div id="bartender-name">Connecting...</div>
-
-            <div id="award-display"></div>
-            
-            <div class="uniform-text">こちら</div>
-            <div id="name-display" class="uniform-text">Loading...</div>
-            <div class="uniform-text">でございます</div>
-            
-            <div id="price-display"></div>
+    <div id="landing-page" class="screen">
+        <div class="landing-title">ARTIFACT BAR</div>
+        <div class="landing-text">
+            唯一無二のバーテンダーが<br>
+            あなただけのカクテルをお作りします。
         </div>
+        <button id="start-btn" class="start-btn">オーダーする</button>
     </div>
 
-    <div id="status">System Ready.</div>
+    <div id="main-app" class="screen hidden">
+        <div id="main-app-container">
+            <div id="content-wrapper" class="fade-wrapper">
+                <img id="bartender-icon" src="" alt="">
+                <div id="bartender-name">Connecting...</div>
+
+                <div id="award-display"></div>
+                
+                <div class="uniform-text">こちら</div>
+                <div id="name-display" class="uniform-text">Loading...</div>
+                <div class="uniform-text">でございます</div>
+                
+                <div id="price-display"></div>
+            </div>
+        </div>
+        <div id="status">System Ready.</div>
+    </div>
 </div>
 
 <script>
+    // 要素の取得
+    const landingPage = document.getElementById('landing-page');
+    const mainApp = document.getElementById('main-app');
+    const startBtn = document.getElementById('start-btn');
+    
+    // 生成画面用要素
     const contentWrapper = document.getElementById('content-wrapper');
     const nameDisplay = document.getElementById('name-display');
     const priceDisplay = document.getElementById('price-display');
@@ -233,33 +295,29 @@
     const awardDisplay = document.getElementById('award-display');
     const statusDisplay = document.getElementById('status');
 
-    // ★修正3：NGワードリスト大幅強化（下ネタ・犯罪・不快語フィルター）
-    const banKeywords = [
-        // 人名・固有名詞系
-        "人物", "生", "没", "氏", "家", "男", "女", "子", "王", "皇", "帝", "将軍", "大名", "武将", "貴族",
-        "選手", "歌手", "俳優", "声優", "作家", "政治家", "軍人", "学者", "実業家", "画家", "タレント", "アイドル", "監督",
-        "グループ", "メンバー", "人々", "一覧", "出身", "在住", "年度", "世紀", "年", "月", "日",
+    // ★スタートボタンクリック時の処理
+    startBtn.addEventListener('click', () => {
+        // トップページをフェードアウト
+        landingPage.classList.add('hidden');
         
-        // 地理系
-        "地理", "都市", "町村", "都", "道", "府", "県", "市", "区", "町", "村", "郡", "国", "地域", "場所", "駅",
+        // メイン画面をフェードイン
+        mainApp.classList.remove('hidden');
         
-        // ★ここから追加：下ネタ・NGワード系
-        "性", "セックス", "風俗", "アダルト", "ポルノ", "エロ", "ヌード", "淫", "精子", "卵子", "生殖",
-        "排泄", "糞", "尿", "便",
-        "犯罪", "事件", "事故", "殺人", "死体", "遺体", "暴力", "虐待", "テロ", "戦争", "兵器",
-        "病気", "障害", "症候群", "ウイルス", "感染", "中毒", "差別"
-    ];
+        // カクテル生成スタート（少し待ってから）
+        setTimeout(() => {
+            serveCocktail();
+        }, 1000);
+    });
+
+    // --- 以下、生成ロジック（そのまま維持） ---
+    const banKeywords = ["人物", "生", "没", "氏", "家", "男", "女", "子", "王", "皇", "帝", "将軍", "大名", "武将", "貴族", "選手", "歌手", "俳優", "声優", "作家", "政治家", "軍人", "学者", "実業家", "画家", "タレント", "アイドル", "監督", "グループ", "メンバー", "人々", "一覧", "出身", "在住", "年度", "世紀", "年", "月", "日", "地理", "都市", "町村", "都", "道", "府", "県", "市", "区", "町", "村", "郡", "国", "地域", "場所", "駅", "賞", "事件", "性", "セックス", "風俗", "アダルト", "ポルノ", "エロ", "ヌード", "淫", "精子", "卵子", "生殖", "排泄", "糞", "尿", "便", "犯罪", "事件", "事故", "殺人", "死体", "遺体", "暴力", "虐待", "テロ", "戦争", "兵器", "病気", "障害", "症候群", "ウイルス", "感染", "中毒", "差別"];
 
     function cleanWord(word) { return word.replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').replace(/_/g, ' ').replace(/一覧/g, '').replace(/カテゴリー:/g, '').trim(); }
     
     function isValidConcept(pageData) {
         const title = pageData.title;
-        // タイトル自体に含まれてはいけない文字
         if (title.includes("氏") || title.includes("天皇") || /^[0-9]+$/.test(title)) return false;
-        
-        // ★タイトル自体にNGワードが含まれていないかもチェック
         if (banKeywords.some(keyword => title.includes(keyword))) return false;
-
         if (!pageData.categories) return true; 
         for (let cat of pageData.categories) {
             if (banKeywords.some(keyword => cat.title.includes(keyword))) return false;
@@ -268,8 +326,8 @@
     }
 
     function generatePrice() {
-        const min = 5;  // 500円
-        const max = 30; // 3000円
+        const min = 5;  
+        const max = 30; 
         const price = Math.floor(Math.random() * (max - min + 1) + min) * 100;
         return `¥${price.toLocaleString()}-`;
     }
@@ -384,8 +442,6 @@
             }
         }, 3000); 
     }
-
-    serveCocktail();
 </script>
 
 <style>
