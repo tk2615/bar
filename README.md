@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -118,27 +118,27 @@
     }
     #award-display.show { opacity: 1; display: inline-block; }
 
-    /* Name Group (Grouping) */
+    /* Name Group */
     .name-group {
         display: flex; flex-direction: column; align-items: center;
         margin-bottom: 30px; width: 100%;
     }
-    
     .prefix-text, .suffix-text {
         font-size: 0.9rem; letter-spacing: 0.2em; color: #aaa; text-align: center;
     }
     
     #name-display {
         color: #fff; 
-        font-size: clamp(1.5rem, 5vw, 2.8rem);
+        font-size: clamp(1.5rem, 5vw, 2.5rem); /* フォントサイズ調整済み */
         line-height: 1.3; 
         margin: 5px 0;
         padding: 0; 
         word-wrap: break-word; width: 100%; text-align: center; white-space: normal;
-        font-weight: 500; letter-spacing: 0.05em;
+        font-weight: 500;
+        letter-spacing: 0.05em;
     }
 
-    /* Price (Separated) */
+    /* Price */
     #price-display {
         font-family: "Garamond", serif !important; font-size: 1.4rem; color: #c0b283;
         margin-bottom: 40px; font-style: italic; letter-spacing: 0.1em; text-align: center;
@@ -149,7 +149,7 @@
         margin: 0 auto 15px auto;
     }
 
-    /* Recipe (Centered) */
+    /* Recipe */
     .recipe-card {
         font-size: 0.85rem; color: #999; line-height: 1.8;
         border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: 0; width: 100%;
@@ -286,17 +286,12 @@
     // --- Logic ---
     async function fetchWordFromWiki(type = "concept", retry = 0) {
         if (retry > 4) {
-            return type === "katakana" ? randomPick(FALLBACK_KATAKANA) : randomPick(SAFE_WORDS);
+            return type === "katakana" ? randomPick(FALLBACK_KATAKANA) : randomPick(FALLBACK_WORDS);
         }
         if (retry > 0) await wait(300); 
 
-        let generatorParams = "";
-        if (type === "poetic") {
-             generatorParams = "generator=random&grnnamespace=0";
-        } else {
-             generatorParams = "generator=random&grnnamespace=0";
-        }
-
+        let generatorParams = "generator=random&grnnamespace=0";
+        
         const url = `https://ja.wikipedia.org/w/api.php?origin=*&action=query&${generatorParams}&grnlimit=20&prop=categories&cllimit=max&format=json`;
 
         try {
@@ -330,12 +325,19 @@
 
     async function generateRecipe() {
         let comment = "";
+        
         if (offlineMode) {
             comment = randomPick(SAFE_POEMS);
         } else {
             const w1 = await fetchWordFromWiki("poetic");
             const w2 = await fetchWordFromWiki("poetic");
-            comment = `「${w1}」と「${w2}」の余韻。`;
+            const patterns = [
+                `「${w1}」と「${w2}」の余韻。`,
+                `まるで${w1}のような、${w2}。`,
+                `後味に${w1}を感じる、${w2}の香り。`,
+                `テーマは「${w1}」。隠し味に${w2}を。`
+            ];
+            comment = randomPick(patterns);
         }
 
         return {
