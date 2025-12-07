@@ -1,3 +1,4 @@
+
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -23,7 +24,7 @@
         overflow: hidden; 
     }
 
-    /* --- Wrapper (画面全体固定) --- */
+    /* --- Wrapper --- */
     .artifact-bar-wrapper {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
@@ -35,20 +36,20 @@
     .bar-bg {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
         background-size: cover; background-position: center;
-        /* フィルターを少し強めにして、どんな画像が来ても雰囲気が統一されるように調整 */
-        opacity: 0.25; filter: sepia(0.5) contrast(1.2) blur(4px) brightness(0.8);
-        transition: opacity 1s ease;
-        /* 初期画像はJSで設定するが、念のため軽量なものを置いておく */
-        background-color: #111;
+        /* 背景が暗くなりすぎないように調整しつつ、文字を見やすく */
+        opacity: 0.3; 
+        filter: sepia(0.3) contrast(1.1) blur(4px) brightness(0.7);
+        transition: opacity 1s ease, background-image 1s ease;
+        background-color: #111; /* 画像読み込み前の保険 */
     }
     .spotlight {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background: radial-gradient(circle at center, rgba(20,20,20,0.4) 0%, rgba(0,0,0,0.98) 85%);
+        background: radial-gradient(circle at center, rgba(20,20,20,0.2) 0%, rgba(0,0,0,0.95) 85%);
         z-index: 0; pointer-events: none;
     }
     .noise {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        opacity: 0.08; pointer-events: none; z-index: 1;
+        opacity: 0.06; pointer-events: none; z-index: 1;
         background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2cpIiBvcGFjaXR5PSIxIi8+PC9zdmc+');
     }
 
@@ -97,7 +98,6 @@
     }
     .fade-wrapper.visible { opacity: 1; filter: blur(0); transform: scale(1); }
 
-    /* Bartender */
     #bartender-icon {
         width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
         border: 1px solid rgba(150, 150, 150, 0.4); box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
@@ -209,7 +209,6 @@
             あなただけのカクテルをお作りします。
         </div>
         <button id="start-btn" class="start-btn">オーダーする</button>
-        <div style="margin-top: 20px; font-size: 0.7rem; color: #555;">Preparing...</div>
     </div>
 
     <div id="main-app" class="screen hidden">
@@ -245,23 +244,33 @@
 
 <script>
     // --- Data ---
-    const SAFE_WORDS = ["月光", "サイバーパンク", "シュレーディンガー", "モナ・リザ", "ミッドナイト", "レトロ", "メランコリー", "ユートピア", "シンギュラリティ", "パラドックス", "エターナル", "トワイライト", "蜃気楼", "カオス", "ノスタルジア", "リグレット", "アビス", "虚構", "ラビリンス"];
-    const SAFE_KATAKANA = ["アンドロメダ", "プロトコル", "エデン", "マトリックス", "リリス", "フェニックス", "リフレイン", "シンドローム", "ファントム", "クリスタル", "メトロポリス", "アルカディア", "ラグナロク", "シリウス", "プラズマ", "オメガ", "イデア", "ノクターン"];
-    const SAFE_POEMS = [
-        "静寂と再生の味わい。", "失われた時間を求めて。", "深い夜の底で輝く光。", "記憶の片隅に残る香り。",
-        "終わりのない夢の続き。", "言葉にできない感情を溶かして。", "透明な哀しみが胸を刺す。", "遠い星からのメッセージ。"
-    ];
+    const SAFE_WORDS = ["月光", "サイバーパンク", "シュレーディンガー", "モナ・リザ", "ミッドナイト", "レトロ", "メランコリー", "ユートピア", "シンギュラリティ", "パラドックス", "エターナル", "トワイライト", "蜃気楼", "カオス", "ノスタルジア", "リグレット", "アビス"];
+    const SAFE_KATAKANA = ["アンドロメダ", "プロトコル", "エデン", "マトリックス", "リリス", "フェニックス", "リフレイン", "シンドローム", "ファントム", "クリスタル", "メトロポリス", "アルカディア", "ラグナロク", "シリウス", "プラズマ", "オメガ"];
+    const SAFE_POEMS = ["静寂と再生の味わい。", "失われた時間を求めて。", "深い夜の底で輝く光。", "記憶の片隅に残る香り。", "星の瞬きをグラスに。"];
     
-    // ★ここが変更点：大量のUnsplash画像IDリスト
-    // 雰囲気が合う「暗いバー」「カクテル」「ネオン」「夜景」などを厳選
-    const BG_IDS = [
-        "1572116469696-31de0f17cc34", "1514362545857-3bc16c4c7d1b", "1470337458703-46ad1756a187", "1566417713940-fe7c737a9ef2",
-        "1551024709-8f23befc6f87", "1499638639663-1f7708890bc6", "1536935338788-846bbe106599", "1504674900247-0877df9cc836",
-        "1543007631-23622440726d", "1583065080141-72a58b479b5a", "1578488347632-945c4953a4b6", "1597075041503-269fa1c5405b",
-        "1574096079513-d8259312b785", "1520121401995-928cd53d49b7", "1563784462-0858916270c4", "1606923429700-87143196000f",
-        "1581008627320-1f84126ee4e2", "1516997121675-4a2d88e0c3b7", "1577258283135-48914127c208", "1600093463592-8e36a3d5b451",
-        "1558507652-2d966236291e", "1570554827083-c64ac3786948", "1561808445-063606066863", "1616433285827-498734937173",
-        "1591243316766-8c130f651234", "1597252928155-994345504544", "1617729788749-44887872441d", "1569937712-c463e32526c7"
+    // ★修正：確実に表示されるUnsplashの直リンク集（20枚以上）
+    const BG_IMAGES = [
+        "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1470337458703-46ad1756a187?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1536935338788-846bbe106599?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1543007631-23622440726d?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1583065080141-72a58b479b5a?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1578488347632-945c4953a4b6?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1597075041503-269fa1c5405b?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1574096079513-d8259312b785?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1520121401995-928cd53d49b7?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1563784462-0858916270c4?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1606923429700-87143196000f?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1581008627320-1f84126ee4e2?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1516997121675-4a2d88e0c3b7?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1577258283135-48914127c208?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1600093463592-8e36a3d5b451?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1558507652-2d966236291e?q=80&w=1920&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1570554827083-c64ac3786948?q=80&w=1920&auto=format&fit=crop"
     ];
 
     const BAN_KEYWORDS = ["人物", "生", "没", "氏", "家", "男", "女", "子", "王", "皇", "帝", "将軍", "選手", "歌手", "俳優", "声優", "作家", "政治", "軍人", "学者", "アイドル", "監督", "メンバー", "一覧", "出身", "在住", "年度", "世紀", "年", "月", "日", "地理", "都市", "町村", "県", "市", "区", "町", "村", "駅", "賞", "事件", "性", "セックス", "風俗", "アダルト", "エロ", "ヌード", "淫", "排泄", "糞", "尿", "便", "犯罪", "殺", "死", "暴力", "虐待", "テロ", "戦争", "兵器", "病", "障害", "菌", "毒", "差別"];
@@ -271,8 +280,7 @@
     const TASTES = ["Dry", "Medium", "Sweet", "Bitter", "Sour", "Spicy", "Refreshing"];
 
     // --- State ---
-    let currentCocktail = null;
-    let nextCocktailPromise = null;
+    let currentCocktail = { name: "", price: "", recipe: {} };
     let isProcessing = false;
     let offlineMode = false;
     let autoTimer = null;
@@ -281,13 +289,6 @@
     const wait = (ms) => new Promise(r => setTimeout(r, ms));
     const randomPick = (arr) => arr[Math.floor(Math.random() * arr.length)];
     const cleanWord = (w) => w.replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').replace(/_/g, ' ').replace(/一覧/g, '').replace(/カテゴリー:/g, '').trim();
-    
-    // ★背景画像のURLを生成する関数
-    function getBgUrl() {
-        const id = randomPick(BG_IDS);
-        // 高品質・軽量化のためのパラメータ付与
-        return `https://images.unsplash.com/photo-${id}?q=75&w=1600&auto=format&fit=crop`;
-    }
 
     function isValidConcept(pageData) {
         const title = pageData.title;
@@ -302,7 +303,9 @@
 
     // --- Logic ---
     async function fetchWordFromWiki(type = "concept", retry = 0) {
-        if (retry > 4) return type === "katakana" ? randomPick(FALLBACK_KATAKANA) : randomPick(SAFE_WORDS);
+        if (retry > 4) {
+            return type === "katakana" ? randomPick(FALLBACK_KATAKANA) : randomPick(SAFE_WORDS);
+        }
         if (retry > 0) await wait(300); 
 
         let generatorParams = "generator=random&grnnamespace=0";
@@ -325,7 +328,7 @@
                 if (type === "katakana") {
                     if (/^[ァ-ヶー・＝=]+$/.test(title) && title.length >= 2 && title.length <= 15) return title;
                 } else if (type === "poetic") {
-                    if (!/^[0-9]+$/.test(title) && title.length >= 2 && title.length <= 8 && !title.includes(" ")) return title;
+                    if (!/^[0-9]+$/.test(title) && title.length >= 2 && title.length <= 6) return title;
                 } else {
                     if (title.length >= 2 && title.length <= 10 && !title.includes(" ")) return title;
                 }
@@ -337,34 +340,10 @@
         }
     }
 
-    // --- Data Generation (Background) ---
-    async function generateCocktailData() {
-        let bartender, word1, word2, award, comment;
-
-        try {
-            const results = await Promise.all([
-                fetchWordFromWiki("katakana"),
-                fetchWordFromWiki("concept"),
-                fetchWordFromWiki("katakana"),
-            ]);
-            bartender = results[0];
-            word1 = results[1];
-            word2 = results[2];
-        } catch (e) {
-            bartender = randomPick(SAFE_KATAKANA);
-            word1 = randomPick(SAFE_WORDS);
-            word2 = randomPick(SAFE_KATAKANA);
-        }
-
-        if (Math.random() > 0.4) {
-            award = null;
-        } else {
-            const w = await fetchWordFromWiki("katakana");
-            const s = randomPick(["Award", "Prize", "Gold", "Cup", "Grand Prix", "Selection"]);
-            const y = Math.floor(Math.random() * (2050 - 1980) + 1980);
-            award = `${w} ${s} ${y}`;
-        }
-
+    // レシピ生成
+    async function generateRecipe() {
+        let comment = "";
+        
         if (offlineMode) {
             comment = randomPick(SAFE_POEMS);
         } else {
@@ -382,38 +361,21 @@
             comment = randomPick(patterns);
         }
 
-        const price = `¥${(Math.floor(Math.random() * (35 - 5) + 5) * 100).toLocaleString()}-`;
-        const recipe = {
+        return {
             base: randomPick(BASES),
             style: randomPick(STYLES),
             taste: randomPick(TASTES),
             alc: Math.floor(Math.random() * (45 - 4) + 4) + "%",
             comment: comment
         };
+    }
 
-        // ★ここで新しい背景画像URLを取得してプリロード
-        const faceUrl = `https://xsgames.co/randomusers/avatar.php?g=${Math.random()<0.5?'male':'female'}&v=${new Date().getTime()}`;
-        const bgUrl = getBgUrl(); 
-        
-        const img = new Image();
-        img.src = faceUrl;
-        const bgImg = new Image();
-        bgImg.src = bgUrl;
-
-        await Promise.race([
-            new Promise(r => img.onload = r),
-            wait(3000)
-        ]);
-
-        return {
-            bartender,
-            name: `${word1}の${word2}`,
-            award,
-            price,
-            recipe,
-            faceUrl,
-            bgUrl
-        };
+    async function generateAward() {
+        if (Math.random() > 0.4) return null;
+        const word = offlineMode ? randomPick(SAFE_KATAKANA) : await fetchWordFromWiki("katakana");
+        const suffix = randomPick(["Award", "Prize", "Gold", "Cup", "Grand Prix", "Selection"]);
+        const year = Math.floor(Math.random() * (2050 - 1980) + 1980);
+        return `${word} ${suffix} ${year}`;
     }
 
     // --- Main Update ---
@@ -422,39 +384,66 @@
         isProcessing = true;
         if (autoTimer) clearTimeout(autoTimer);
         
+        document.getElementById('status').textContent = "Brewing...";
         const wrapper = document.getElementById('content-wrapper');
         const awardUI = document.getElementById('award-display');
         const timeBar = document.getElementById('time-bar');
         
-        wrapper.classList.remove('visible');
-        awardUI.classList.remove('show');
         timeBar.style.transition = 'none';
         timeBar.style.width = '0%';
-        document.getElementById('status').textContent = "Brewing...";
+        
+        wrapper.classList.remove('visible');
+        awardUI.classList.remove('show');
 
         await wait(1200);
 
         try {
-            if (!nextCocktailPromise) {
-                nextCocktailPromise = generateCocktailData();
-            }
-            const data = await nextCocktailPromise;
-            currentCocktail = data;
-
-            document.getElementById('bg-layer').style.backgroundImage = `url('${data.bgUrl}')`;
-            document.getElementById('bartender-icon').src = data.faceUrl;
-            document.getElementById('bartender-name').textContent = `BARTENDER: ${data.bartender}`;
-            document.getElementById('name-display').textContent = data.name;
-            document.getElementById('price-display').textContent = data.price;
+            // 背景画像のランダム切り替え
+            const bgUrl = randomPick(BG_IMAGES);
+            const bgLayer = document.getElementById('bg-layer');
+            bgLayer.style.opacity = 0; // フェードアウト
             
-            document.getElementById('recipe-base').textContent = data.recipe.base;
-            document.getElementById('recipe-style').textContent = data.recipe.style;
-            document.getElementById('recipe-taste').textContent = data.recipe.taste;
-            document.getElementById('recipe-alc').textContent = data.recipe.alc;
-            document.getElementById('recipe-comment').textContent = data.recipe.comment;
+            // 少し待ってから切り替え
+            setTimeout(() => {
+                bgLayer.style.backgroundImage = `url('${bgUrl}')`;
+                bgLayer.style.opacity = 0.3; // フェードイン
+            }, 600);
 
-            if (data.award) {
-                awardUI.textContent = `★ ${data.award}`;
+            // 並列取得
+            const [bartender, word1, word2, award, recipe] = await Promise.all([
+                fetchWordFromWiki("katakana"),
+                fetchWordFromWiki("concept"),
+                fetchWordFromWiki("katakana"),
+                generateAward(),
+                generateRecipe()
+            ]);
+            
+            const price = `¥${(Math.floor(Math.random() * (35 - 5) + 5) * 100).toLocaleString()}-`;
+            currentCocktail = { name: `${word1}の${word2}`, price, recipe };
+
+            const faceUrl = `https://xsgames.co/randomusers/avatar.php?g=${Math.random()<0.5?'male':'female'}&v=${new Date().getTime()}`;
+            const img = new Image();
+            img.src = faceUrl;
+            
+            // プリロード
+            const bgPreload = new Image();
+            bgPreload.src = bgUrl;
+
+            await Promise.race([ new Promise(r => img.onload = r), wait(2000) ]);
+
+            document.getElementById('bartender-icon').src = faceUrl;
+            document.getElementById('bartender-name').textContent = `BARTENDER: ${bartender}`;
+            document.getElementById('name-display').textContent = currentCocktail.name;
+            document.getElementById('price-display').textContent = price;
+            
+            document.getElementById('recipe-base').textContent = recipe.base;
+            document.getElementById('recipe-style').textContent = recipe.style;
+            document.getElementById('recipe-taste').textContent = recipe.taste;
+            document.getElementById('recipe-alc').textContent = recipe.alc;
+            document.getElementById('recipe-comment').textContent = recipe.comment;
+
+            if (award) {
+                awardUI.textContent = `★ ${award}`;
                 awardUI.style.display = "inline-block";
                 setTimeout(() => awardUI.classList.add('show'), 300);
             } else {
@@ -465,8 +454,7 @@
             document.getElementById('status').textContent = "";
             isProcessing = false;
 
-            nextCocktailPromise = generateCocktailData();
-
+            // Timer Start
             requestAnimationFrame(() => {
                 timeBar.style.transition = 'width 20s linear';
                 timeBar.style.width = '100%';
@@ -478,27 +466,22 @@
 
         } catch (e) {
             console.error(e);
-            nextCocktailPromise = null;
-            setTimeout(serveCocktail, 500);
+            setTimeout(serveCocktail, 1000);
             isProcessing = false;
         }
     }
 
     // --- Events ---
-    window.addEventListener('DOMContentLoaded', () => {
-        nextCocktailPromise = generateCocktailData();
-    });
-
     document.getElementById('start-btn').addEventListener('click', () => {
         document.getElementById('landing-page').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
-        serveCocktail();
+        setTimeout(serveCocktail, 500);
     });
 
     document.getElementById('next-btn').addEventListener('click', serveCocktail);
 
     document.getElementById('share-btn').addEventListener('click', () => {
-        if (!currentCocktail || !currentCocktail.name) return;
+        if (!currentCocktail.name) return;
         const text = `BAR EPHEMERAでオーダーしました。\n\n『${currentCocktail.name}』\n${currentCocktail.price}\n\nBase: ${currentCocktail.recipe.base} / Taste: ${currentCocktail.recipe.taste}\nコメント: ${currentCocktail.recipe.comment}\n担当: ${document.getElementById('bartender-name').textContent}\n\n#BarEphemera`;
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
         window.open(url, '_blank');
