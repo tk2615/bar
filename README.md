@@ -5,38 +5,41 @@
 
     * { box-sizing: border-box; }
 
+    /* ★修正点1: bodyとhtmlの高さをvhで強制確保 */
     body, html {
         margin: 0 !important;
         padding: 0 !important;
-        width: 100%;
-        height: 100%;
+        width: 100vw;
+        height: 100vh; /* ここ重要 */
+        min-height: 100vh;
         background-color: #050505;
         color: #e0d8c8;
         font-family: 'Shippori Mincho', serif !important;
         overflow: hidden; 
     }
 
-    /* タイトル設定（ブラウザのタブ用） */
-    title { display: none; } /* HTML内では効かないが念の為 */
-
+    /* ★修正点2: ラッパーも画面いっぱいに広げる */
     .artifact-bar-wrapper {
-        position: relative;
-        width: 100%;
-        height: 100%;
+        position: fixed; /* fixedにして画面に張り付かせる */
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
         overflow: hidden;
+        z-index: 0;
     }
 
     /* 背景 */
     .bar-bg {
-        position: fixed;
+        position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: 0;
+        z-index: -1; /* ラッパー内の相対順序 */
         background-image: url('https://images.unsplash.com/photo-1572116469696-31de0f17cc34?q=80&w=1920&auto=format&fit=crop'); 
         background-size: cover;
         background-position: center;
@@ -44,24 +47,24 @@
         filter: sepia(0.3) contrast(1.1) blur(2px);
     }
     .spotlight {
-        position: fixed;
+        position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         background: radial-gradient(circle at center, rgba(30,30,30,0.3) 0%, rgba(0,0,0,0.95) 90%);
-        z-index: 1;
+        z-index: 0;
         pointer-events: none;
     }
     .noise {
-        position: fixed;
+        position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         opacity: 0.08;
         pointer-events: none;
-        z-index: 2;
+        z-index: 1;
         background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2cpIiBvcGFjaXR5PSIxIi8+PC9zdmc+');
     }
 
@@ -77,7 +80,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        transition: opacity 1.2s ease-in-out, visibility 1.2s;
+        transition: opacity 1.0s ease-in-out, visibility 1.0s;
     }
     .hidden {
         opacity: 0;
@@ -86,49 +89,42 @@
     }
 
     /* トップページ */
-    #landing-page { z-index: 20; }
+    #landing-page { z-index: 20; width: 100%; }
     
     .landing-title {
         font-family: 'Cinzel', serif !important;
-        font-size: clamp(2rem, 7vw, 4.5rem); /* 少し大きくした */
+        font-size: clamp(2rem, 6vw, 4rem);
         color: #fff;
-        letter-spacing: 0.15em;
+        letter-spacing: 0.2em;
         margin-bottom: 30px;
-        text-shadow: 0 0 20px rgba(255,255,255,0.4);
+        text-shadow: 0 0 20px rgba(255,255,255,0.3);
         text-align: center;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
-        padding-bottom: 10px;
+        width: 100%;
     }
-    
     .landing-text {
-        font-size: clamp(0.9rem, 3.5vw, 1.1rem);
-        line-height: 2.2;
-        letter-spacing: 0.15em;
-        margin-bottom: 60px;
+        font-size: clamp(0.9rem, 3vw, 1.1rem);
+        line-height: 2.0;
+        letter-spacing: 0.1em;
+        margin-bottom: 50px;
         text-align: center;
         opacity: 0.9;
         padding: 0 20px;
+        width: 100%;
     }
-    
     .start-btn {
-        padding: 15px 45px;
+        padding: 12px 30px;
         border: 1px solid rgba(255,255,255,0.4);
-        background: rgba(0,0,0,0.3);
+        background: rgba(0,0,0,0.4);
         color: #fff;
         font-family: 'Shippori Mincho', serif;
-        font-size: 1.1rem;
-        letter-spacing: 0.3em;
+        font-size: 1.0rem;
+        letter-spacing: 0.2em;
         cursor: pointer;
-        transition: all 0.5s ease;
-        text-transform: uppercase;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
     }
-    .start-btn:hover {
-        background: rgba(255,255,255,0.15);
-        border-color: rgba(255,255,255,0.9);
-        box-shadow: 0 0 20px rgba(255,255,255,0.2);
-        letter-spacing: 0.5em;
-    }
-    .start-btn:active { transform: scale(0.98); }
+    .start-btn:active { transform: scale(0.95); }
 
     /* メイン画面 */
     #main-app-container {
@@ -163,6 +159,9 @@
         margin-bottom: 10px;
         filter: brightness(0.8) contrast(1.2) sepia(0.2);
         background-color: #111;
+        display: block; /* ブロック要素にして崩れ防止 */
+        margin-left: auto;
+        margin-right: auto;
     }
     #bartender-name {
         font-size: 0.7rem;
@@ -237,8 +236,6 @@
     }
 </style>
 
-<script>document.title = "BAR EPHEMERA";</script>
-
 <div class="artifact-bar-wrapper">
     <div class="bar-bg"></div>
     <div class="spotlight"></div>
@@ -287,6 +284,7 @@
 
     let isProcessing = false;
 
+    // スタートボタン処理
     startBtn.addEventListener('click', () => {
         if (isProcessing) return;
         isProcessing = true;
@@ -294,12 +292,12 @@
         landingPage.classList.add('hidden');
         mainApp.classList.remove('hidden');
         
+        // 確実にDOMが描画されてから処理開始
         setTimeout(() => {
             serveCocktail();
-        }, 800);
+        }, 500);
     });
 
-    // NGワード
     const banKeywords = ["人物", "生", "没", "氏", "家", "男", "女", "子", "王", "皇", "帝", "将軍", "選手", "歌手", "俳優", "声優", "作家", "政治", "軍人", "学者", "アイドル", "監督", "メンバー", "一覧", "出身", "在住", "年度", "世紀", "年", "月", "日", "地理", "都市", "町村", "県", "市", "区", "町", "村", "駅", "賞", "事件", "性", "セックス", "風俗", "アダルト", "エロ", "ヌード", "淫", "排泄", "糞", "尿", "便", "犯罪", "殺", "死", "暴力", "虐待", "テロ", "戦争", "兵器", "病", "障害", "菌", "毒", "差別"];
 
     function cleanWord(word) { return word.replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').replace(/_/g, ' ').replace(/一覧/g, '').replace(/カテゴリー:/g, '').trim(); }
@@ -443,6 +441,7 @@
 </script>
 
 <style>
+  /* 念の為のh1消し */
   h1:first-of-type {
     display: none !important;
   }
